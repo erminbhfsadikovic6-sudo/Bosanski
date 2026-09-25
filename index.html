@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1769e0">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<title>Bosanski</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#17202a;background:#f4f6f8}
+*{box-sizing:border-box}body{margin:0}main{max-width:760px;margin:auto;padding:18px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+h1{margin:4px 0}.sub{color:#667085;margin:0 0 14px}
+.card,.panel{background:#fff;border-radius:20px;padding:20px;margin:14px 0;box-shadow:0 5px 22px #00000012}
+.flash{min-height:270px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;cursor:pointer}
+.lang{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#667085}
+.sentence{font-size:29px;line-height:1.3;margin:18px 0}
+.answer{color:#1769e0}
+button{border:0;border-radius:12px;padding:12px 15px;font-size:16px;cursor:pointer}
+.primary{background:#1769e0;color:#fff}.good{background:#d9f7df}.hard{background:#fff0c7}.bad{background:#ffdede}
+.row{display:flex;flex-wrap:wrap;gap:7px}.row>*{flex:1 1 auto}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.stat{background:#eef0f3;border-radius:12px;padding:10px;text-align:center}.stat b{display:block;font-size:20px}
+textarea{width:100%;padding:12px;border:1px solid #ccd1d8;border-radius:11px;font:inherit;min-height:76px;margin:6px 0 12px}
+input{width:100%;padding:11px;border:1px solid #ccd1d8;border-radius:11px;font:inherit;margin:6px 0 12px}
+.small{font-size:13px;color:#667085}.item{padding:11px 0;border-bottom:1px solid #eee}.item button{padding:6px 9px;font-size:13px}
+.hidden{display:none}.install{display:none}.tag{font-size:12px;background:#edf4ff;color:#1769e0;padding:4px 8px;border-radius:20px}
+</style>
+</head>
+<body>
+<main>
+<header><div><h1>🇧🇦 Bosanski</h1><div class="sub">Tvoje lične bosanske karte</div></div><button id="install" class="primary install">📲 Instaliraj</button></header>
+
+<div class="stats">
+<div class="stat"><b id="due">0</b><span>za ponavljanje</span></div>
+<div class="stat"><b id="mastered">0</b><span>naučeno</span></div>
+<div class="stat"><b id="today">0</b><span>danas</span></div>
+<div class="stat"><b id="streak">0</b><span>dan zaredom</span></div>
+</div>
+
+<div class="card flash" id="flash" onclick="flip()">
+<div class="lang" id="label">Deutsch</div>
+<div class="sentence" id="sentence">Dodaj prvu kartu.</div>
+<div class="small" id="hint">Tippen zum Umdrehen</div>
+</div>
+
+<div class="row">
+<button class="bad" onclick="rate('again')">❌ Nicht gewusst</button>
+<button class="hard" onclick="rate('hard')">🟡 Schwer</button>
+<button class="good" onclick="rate('good')">✅ Gewusst</button>
+</div>
+
+<div class="panel">
+<h2>➕ Neue Karte</h2>
+<label>Deutsch</label>
+<textarea id="de" placeholder="Ich wollte tagsüber lernen, aber dann begann ich zu spielen."></textarea>
+<label>Bosnisch</label>
+<textarea id="bs" placeholder="Htio sam učiti tokom dana, ali onda sam počeo igrati."></textarea>
+<button class="primary" onclick="addCard()">Karte speichern</button>
+<p class="small">Die App plant die nächste Wiederholung automatisch. Ganze Alltagssätze sind ideal.</p>
+</div>
+
+<div class="panel">
+<h2>🔎 Meine Karten</h2>
+<input id="search" oninput="renderList()" placeholder="Suchen...">
+<div id="list"></div>
+<div class="row">
+<button onclick="shuffle()">🔀 Mischen</button>
+<button onclick="exportCards()">⬇️ Backup</button>
+<button onclick="document.getElementById('file').click()">⬆️ Backup laden</button>
+<input id="file" class="hidden" type="file" accept=".json" onchange="importCards(event)">
+</div>
+</div>
+
+<div class="panel">
+<h2>⚙️ Lernsystem</h2>
+<p class="small">Neue Karten kommen wieder nach 10 Minuten. Danach werden sie bei Erfolg schrittweise auf 1, 3, 7, 14, 30 und 60 Tage verteilt. Fehler holen sie wieder nach 10 Minuten zurück.</p>
+<button onclick="resetProgress()">Fortschritt zurücksetzen</button>
+</div>
+</main>
+
+<script>
+let cards=JSON.parse(localStorage.getItem("bosanskiCards")||"[]");
+let current=null,flipped=false;
+const intervals=[10*60000,86400000,3*86400000,7*86400000,14*86400000,30*86400000,60*86400000];
+
+function save(){localStorage.setItem("bosanskiCards",JSON.stringify(cards));renderAll()}
+function dueCards(){return cards.filter(c=>(c.next||0)<=Date.now())}
+function todayKey(){return new Date().toISOString().slice(0,10)}
+function renderAll(){renderStats();renderList();nextCard()}
+function renderStats(){
+document.getElementById("due").textContent=dueCards().length;
+document.getElementById("mastered").textContent=cards.filter(c=>(c.level||0)>=6).length;
+document.getElementById("today").textContent=cards.filter(c=>c.last===todayKey()).length;
+let d=0, cur=new Date(); cur.setHours(0,0,0,0);
+while(localStorage.getItem("bosanskiDay_"+cur.toISOString().slice(0,10))) {d++;cur.setDate(cur.getDate()-1)}
+document.getElementById("streak").textContent=d;
+}
+function renderList(){
+let q=(document.getElementById("search").value||"").toLowerCase();
+let a=cards.filter(c=>(c.de+" "+c.bs).toLowerCase().includes(q));
+document.getElementById("list").innerHTML=a.map(c=>{
+let i=cards.indexOf(c);
+return `<div class="item"><span class="tag">Stufe ${c.level||0}</span> <b>${esc(c.de)}</b><br>${esc(c.bs)}
+<button onclick="del(${i})">🗑️</button></div>`}).join("")||"<p class='small'>Keine Karten gefunden.</p>";
+}
+function nextCard(){
+let d=dueCards();
+if(!d.length){current=null;flipped=false;document.getElementById("label").textContent="Fertig";document.getElementById("sentence").textContent="Für heute gibt es nichts mehr zu wiederholen 🎉";document.getElementById("hint").textContent="Du hast den Kartenkobold besiegt.";return}
+current=d[Math.floor(Math.random()*d.length)];flipped=false;show();
+}
+function show(){
+if(!current)return;
+document.getElementById("label").textContent=flipped?"Bosnisch":"Deutsch";
+document.getElementById("sentence").textContent=flipped?current.bs:current.de;
+document.getElementById("sentence").className="sentence"+(flipped?" answer":"");
+document.getElementById("hint").textContent=flipped?"Tippen für Deutsch":"Erst selbst übersetzen, dann tippen";
+}
+function flip(){if(current){flipped=!flipped;show()}}
+function rate(type){
+if(!current)return;
+let level=current.level||0;
+if(type==="again"){level=0;current.next=Date.now()+intervals[0]}
+else if(type==="hard"){level=Math.max(0,level);current.next=Date.now()+(intervals[Math.min(level,intervals.length-1)]/2)}
+else {level=Math.min(level+1,intervals.length-1);current.next=Date.now()+intervals[level]}
+current.level=level;current.last=todayKey();
+localStorage.setItem("bosanskiDay_"+todayKey(),"1");
+save();
+}
+function addCard(){
+let de=document.getElementById("de").value.trim(),bs=document.getElementById("bs").value.trim();
+if(!de||!bs){alert("Beide Felder ausfüllen.");return}
+cards.push({de,bs,level:0,next:Date.now(),last:null});
+document.getElementById("de").value="";document.getElementById("bs").value="";
+save();
+}
+function del(i){if(confirm("Karte löschen?")){cards.splice(i,1);save()}}
+function shuffle(){cards.sort(()=>Math.random()-.5);save()}
+function esc(s){return s.replace(/[&<>"']/g,x=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[x]))}
+function exportCards(){
+let b=new Blob([JSON.stringify(cards,null,2)],{type:"application/json"});
+let a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="bosanski-karte.json";a.click();
+}
+function importCards(e){
+let f=e.target.files[0];if(!f)return;
+let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x))throw 1;cards=x;save();}catch{alert("Ungültiges Backup.")}};r.readAsText(f);
+}
+function resetProgress(){
+if(confirm("Nur Lernfortschritt zurücksetzen? Die Karten bleiben erhalten.")){
+cards.forEach(c=>{c.level=0;c.next=Date.now();c.last=null});save();
+}}
+let deferred;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;document.getElementById("install").style.display="block"});
+document.getElementById("install").onclick=async()=>{if(deferred){deferred.prompt();await deferred.userChoice;deferred=null;document.getElementById("install").style.display="none"}};
+if("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js"));
+renderAll();
+</script>
+</body>
+</html>
