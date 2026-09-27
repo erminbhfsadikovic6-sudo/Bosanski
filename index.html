@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#1769e0">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
-<title>Bosanski</title>
+<title>Vokabeln</title>
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#17202a;background:#f4f6f8}
 *{box-sizing:border-box}body{margin:0}main{max-width:760px;margin:auto;padding:18px}
@@ -15,145 +15,414 @@ h1{margin:4px 0}.sub{color:#667085;margin:0 0 14px}
 .card,.panel{background:#fff;border-radius:20px;padding:20px;margin:14px 0;box-shadow:0 5px 22px #00000012}
 .flash{min-height:270px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;cursor:pointer}
 .lang{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#667085}
-.sentence{font-size:29px;line-height:1.3;margin:18px 0}
-.answer{color:#1769e0}
+.sentence{font-size:29px;line-height:1.3;margin:18px 0}.answer{color:#1769e0}
 button{border:0;border-radius:12px;padding:12px 15px;font-size:16px;cursor:pointer}
 .primary{background:#1769e0;color:#fff}.good{background:#d9f7df}.hard{background:#fff0c7}.bad{background:#ffdede}
 .row{display:flex;flex-wrap:wrap;gap:7px}.row>*{flex:1 1 auto}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
 .stat{background:#eef0f3;border-radius:12px;padding:10px;text-align:center}.stat b{display:block;font-size:20px}
 textarea{width:100%;padding:12px;border:1px solid #ccd1d8;border-radius:11px;font:inherit;min-height:76px;margin:6px 0 12px}
-input{width:100%;padding:11px;border:1px solid #ccd1d8;border-radius:11px;font:inherit;margin:6px 0 12px}
+input,select{width:100%;padding:11px;border:1px solid #ccd1d8;border-radius:11px;font:inherit;margin:6px 0 12px}
 .small{font-size:13px;color:#667085}.item{padding:11px 0;border-bottom:1px solid #eee}.item button{padding:6px 9px;font-size:13px}
 .hidden{display:none}.install{display:none}.tag{font-size:12px;background:#edf4ff;color:#1769e0;padding:4px 8px;border-radius:20px}
+.deckbar{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.deckbtn{background:#eef0f3}.deckbtn.active{background:#1769e0;color:#fff}
+.deck-title{display:flex;align-items:center;justify-content:space-between;gap:10px}
+@media(max-width:520px){.stats{grid-template-columns:repeat(2,1fr)}.deckbar{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <main>
-<header><div><h1>🇧🇦 Bosanski</h1><div class="sub">Tvoje lične bosanske karte</div></div><button id="install" class="primary install">📲 Instaliraj</button></header>
+<header>
+  <div>
+    <h1>📚 Vokabeln</h1>
+    <div class="sub">Deine persönlichen Karteikarten</div>
+  </div>
+  <button id="install" class="primary install">📲 Installieren</button>
+</header>
+
+<div class="deckbar">
+  <button id="deckBosanski" class="deckbtn active" onclick="switchDeck('bosanski')">🇧🇦 Bosnisch</button>
+  <button id="deckDeutsch" class="deckbtn" onclick="switchDeck('deutsch')">🇩🇪 Deutsch</button>
+</div>
+
+<div class="card" style="padding:14px 20px">
+  <div class="deck-title">
+    <div>
+      <strong id="deckName">🇧🇦 Bosnisch</strong>
+      <div class="small" id="deckDescription">Deutsch → Bosnisch</div>
+    </div>
+    <span class="tag" id="cardCount">0 Karten</span>
+  </div>
+</div>
 
 <div class="stats">
-<div class="stat"><b id="due">0</b><span>za ponavljanje</span></div>
-<div class="stat"><b id="mastered">0</b><span>naučeno</span></div>
-<div class="stat"><b id="today">0</b><span>danas</span></div>
-<div class="stat"><b id="streak">0</b><span>dan zaredom</span></div>
+  <div class="stat"><b id="due">0</b><span>zu wiederholen</span></div>
+  <div class="stat"><b id="mastered">0</b><span>gelernt</span></div>
+  <div class="stat"><b id="today">0</b><span>heute</span></div>
+  <div class="stat"><b id="streak">0</b><span>Tage in Folge</span></div>
 </div>
 
 <div class="card flash" id="flash" onclick="flip()">
-<div class="lang" id="label">Deutsch</div>
-<div class="sentence" id="sentence">Dodaj prvu kartu.</div>
-<div class="small" id="hint">Tippen zum Umdrehen</div>
+  <div class="lang" id="label">Deutsch</div>
+  <div class="sentence" id="sentence">Füge deine erste Karte hinzu.</div>
+  <div class="small" id="hint">Tippen zum Umdrehen</div>
 </div>
 
 <div class="row">
-<button class="bad" onclick="rate('again')">❌ Nicht gewusst</button>
-<button class="hard" onclick="rate('hard')">🟡 Schwer</button>
-<button class="good" onclick="rate('good')">✅ Gewusst</button>
+  <button class="bad" onclick="rate('again')">❌ Nicht gewusst</button>
+  <button class="hard" onclick="rate('hard')">🟡 Schwer</button>
+  <button class="good" onclick="rate('good')">✅ Gewusst</button>
 </div>
 
 <div class="panel">
-<h2>➕ Neue Karte</h2>
-<label>Deutsch</label>
-<textarea id="de" placeholder="Ich wollte tagsüber lernen, aber dann begann ich zu spielen."></textarea>
-<label>Bosnisch</label>
-<textarea id="bs" placeholder="Htio sam učiti tokom dana, ali onda sam počeo igrati."></textarea>
-<button class="primary" onclick="addCard()">Karte speichern</button>
-<p class="small">Die App plant die nächste Wiederholung automatisch. Ganze Alltagssätze sind ideal.</p>
+  <h2>➕ Neue Karte</h2>
+  <label id="frontLabel">Deutsch</label>
+  <textarea id="front" placeholder="Ich wollte tagsüber lernen, aber dann begann ich zu spielen."></textarea>
+  <label id="backLabel">Bosnisch</label>
+  <textarea id="back" placeholder="Htio sam učiti tokom dana, ali onda sam počeo igrati."></textarea>
+  <button class="primary" onclick="addCard()">Karte speichern</button>
+  <p class="small" id="addHint">Im Bosnisch-Deck werden Deutsch und Bosnisch gespeichert.</p>
 </div>
 
 <div class="panel">
-<h2>🔎 Meine Karten</h2>
-<input id="search" oninput="renderList()" placeholder="Suchen...">
-<div id="list"></div>
-<div class="row">
-<button onclick="shuffle()">🔀 Mischen</button>
-<button onclick="exportCards()">⬇️ Backup</button>
-<button onclick="document.getElementById('file').click()">⬆️ Backup laden</button>
-<input id="file" class="hidden" type="file" accept=".json" onchange="importCards(event)">
-</div>
+  <h2>🔎 Meine Karten</h2>
+  <input id="search" oninput="renderList()" placeholder="Suchen...">
+  <div id="list"></div>
+  <div class="row">
+    <button onclick="shuffle()">🔀 Mischen</button>
+    <button onclick="exportCards()">⬇️ Backup</button>
+    <button onclick="document.getElementById('file').click()">⬆️ Backup laden</button>
+    <input id="file" class="hidden" type="file" accept=".json" onchange="importCards(event)">
+  </div>
 </div>
 
 <div class="panel">
-<h2>⚙️ Lernsystem</h2>
-<p class="small">Neue Karten kommen wieder nach 10 Minuten. Danach werden sie bei Erfolg schrittweise auf 1, 3, 7, 14, 30 und 60 Tage verteilt. Fehler holen sie wieder nach 10 Minuten zurück.</p>
-<button onclick="resetProgress()">Fortschritt zurücksetzen</button>
+  <h2>⚙️ Lernsystem</h2>
+  <p class="small">Neue Karten kommen nach 10 Minuten wieder. Danach werden sie bei Erfolg schrittweise auf 1, 3, 7, 14, 30 und 60 Tage verteilt. Fehler holen sie nach 10 Minuten zurück.</p>
+  <button onclick="resetProgress()">Fortschritt dieses Decks zurücksetzen</button>
 </div>
+
 </main>
 
 <script>
-let cards=JSON.parse(localStorage.getItem("bosanskiCards")||"[]");
-let current=null,flipped=false;
+const STORAGE_KEY = "vocabAppData";
+const OLD_STORAGE_KEY = "bosanskiCards";
+
 const intervals=[10*60000,86400000,3*86400000,7*86400000,14*86400000,30*86400000,60*86400000];
 
-function save(){localStorage.setItem("bosanskiCards",JSON.stringify(cards));renderAll()}
-function dueCards(){return cards.filter(c=>(c.next||0)<=Date.now())}
-function todayKey(){return new Date().toISOString().slice(0,10)}
-function renderAll(){renderStats();renderList();nextCard()}
+const deckConfig={
+  bosanski:{
+    name:"🇧🇦 Bosnisch",
+    description:"Deutsch → Bosnisch",
+    frontLabel:"Deutsch",
+    backLabel:"Bosnisch",
+    frontPlaceholder:"Ich wollte tagsüber lernen, aber dann begann ich zu spielen.",
+    backPlaceholder:"Htio sam učiti tokom dana, ali onda sam počeo igrati.",
+    hint:"Im Bosnisch-Deck werden Deutsch und Bosnisch gespeichert."
+  },
+  deutsch:{
+    name:"🇩🇪 Deutsch",
+    description:"Deutsche Vokabeln",
+    frontLabel:"Deutsches Wort / Satz",
+    backLabel:"Bedeutung / Erklärung",
+    frontPlaceholder:"z. B. konsequent",
+    backPlaceholder:"z. B. etwas ohne Abweichung durchziehen",
+    hint:"Das Deutsch-Deck ist unabhängig vom Bosnisch-Deck."
+  }
+};
+
+let data=loadData();
+let currentDeck="bosanski";
+let current=null;
+let flipped=false;
+
+function defaultData(){
+  return {version:2,decks:{bosanski:[],deutsch:[]}};
+}
+
+function loadData(){
+  const raw=localStorage.getItem(STORAGE_KEY);
+  if(raw){
+    try{
+      const parsed=JSON.parse(raw);
+      if(parsed && parsed.decks){
+        if(!Array.isArray(parsed.decks.bosanski)) parsed.decks.bosanski=[];
+        if(!Array.isArray(parsed.decks.deutsch)) parsed.decks.deutsch=[];
+        return parsed;
+      }
+    }catch(e){}
+  }
+
+  // Migration: Die alte Datenbank wird NICHT gelöscht.
+  // Bestehende Karten + level/next/last bleiben erhalten.
+  const oldRaw=localStorage.getItem(OLD_STORAGE_KEY);
+  const migrated=defaultData();
+
+  if(oldRaw){
+    try{
+      const oldCards=JSON.parse(oldRaw);
+      if(Array.isArray(oldCards)){
+        migrated.decks.bosanski=oldCards.map(c=>({
+          id:c.id||crypto.randomUUID(),
+          front:c.de??"",
+          back:c.bs??"",
+          level:c.level||0,
+          next:c.next||Date.now(),
+          last:c.last||null
+        }));
+      }
+    }catch(e){}
+  }
+
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(migrated));
+  return migrated;
+}
+
+function cards(){
+  return data.decks[currentDeck];
+}
+
+function save(){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+  renderAll();
+}
+
+function todayKey(){
+  return new Date().toISOString().slice(0,10);
+}
+
+function dueCards(){
+  return cards().filter(c=>(c.next||0)<=Date.now());
+}
+
+function renderAll(){
+  updateDeckUI();
+  renderStats();
+  renderList();
+  nextCard();
+}
+
+function updateDeckUI(){
+  const cfg=deckConfig[currentDeck];
+  document.getElementById("deckName").textContent=cfg.name;
+  document.getElementById("deckDescription").textContent=cfg.description;
+  document.getElementById("cardCount").textContent=cards().length+" Karten";
+  document.getElementById("frontLabel").textContent=cfg.frontLabel;
+  document.getElementById("backLabel").textContent=cfg.backLabel;
+  document.getElementById("front").placeholder=cfg.frontPlaceholder;
+  document.getElementById("back").placeholder=cfg.backPlaceholder;
+  document.getElementById("addHint").textContent=cfg.hint;
+  document.getElementById("deckBosanski").classList.toggle("active",currentDeck==="bosanski");
+  document.getElementById("deckDeutsch").classList.toggle("active",currentDeck==="deutsch");
+}
+
 function renderStats(){
-document.getElementById("due").textContent=dueCards().length;
-document.getElementById("mastered").textContent=cards.filter(c=>(c.level||0)>=6).length;
-document.getElementById("today").textContent=cards.filter(c=>c.last===todayKey()).length;
-let d=0, cur=new Date(); cur.setHours(0,0,0,0);
-while(localStorage.getItem("bosanskiDay_"+cur.toISOString().slice(0,10))) {d++;cur.setDate(cur.getDate()-1)}
-document.getElementById("streak").textContent=d;
+  const a=cards();
+  document.getElementById("due").textContent=dueCards().length;
+  document.getElementById("mastered").textContent=a.filter(c=>(c.level||0)>=6).length;
+  document.getElementById("today").textContent=a.filter(c=>c.last===todayKey()).length;
+
+  let d=0,curDate=new Date();
+  curDate.setHours(0,0,0,0);
+  while(localStorage.getItem("vocabDay_"+curDate.toISOString().slice(0,10))){
+    d++;
+    curDate.setDate(curDate.getDate()-1);
+  }
+  document.getElementById("streak").textContent=d;
 }
+
 function renderList(){
-let q=(document.getElementById("search").value||"").toLowerCase();
-let a=cards.filter(c=>(c.de+" "+c.bs).toLowerCase().includes(q));
-document.getElementById("list").innerHTML=a.map(c=>{
-let i=cards.indexOf(c);
-return `<div class="item"><span class="tag">Stufe ${c.level||0}</span> <b>${esc(c.de)}</b><br>${esc(c.bs)}
-<button onclick="del(${i})">🗑️</button></div>`}).join("")||"<p class='small'>Keine Karten gefunden.</p>";
+  const q=(document.getElementById("search").value||"").toLowerCase();
+  const a=cards().filter(c=>(c.front+" "+c.back).toLowerCase().includes(q));
+
+  document.getElementById("list").innerHTML=a.map(c=>{
+    const i=cards().indexOf(c);
+    return `<div class="item">
+      <span class="tag">Stufe ${c.level||0}</span>
+      <b>${esc(c.front)}</b><br>${esc(c.back)}
+      <button onclick="del(${i})">🗑️</button>
+    </div>`;
+  }).join("")||"<p class='small'>Keine Karten gefunden.</p>";
 }
+
 function nextCard(){
-let d=dueCards();
-if(!d.length){current=null;flipped=false;document.getElementById("label").textContent="Fertig";document.getElementById("sentence").textContent="Für heute gibt es nichts mehr zu wiederholen 🎉";document.getElementById("hint").textContent="Du hast den Kartenkobold besiegt.";return}
-current=d[Math.floor(Math.random()*d.length)];flipped=false;show();
+  const d=dueCards();
+  if(!d.length){
+    current=null;
+    flipped=false;
+    document.getElementById("label").textContent="Fertig";
+    document.getElementById("sentence").textContent="Für dieses Deck gibt es gerade nichts mehr zu wiederholen 🎉";
+    document.getElementById("hint").textContent="Du hast den Kartenkobold besiegt.";
+    return;
+  }
+  current=d[Math.floor(Math.random()*d.length)];
+  flipped=false;
+  show();
 }
+
 function show(){
-if(!current)return;
-document.getElementById("label").textContent=flipped?"Bosnisch":"Deutsch";
-document.getElementById("sentence").textContent=flipped?current.bs:current.de;
-document.getElementById("sentence").className="sentence"+(flipped?" answer":"");
-document.getElementById("hint").textContent=flipped?"Tippen für Deutsch":"Erst selbst übersetzen, dann tippen";
+  if(!current)return;
+  const cfg=deckConfig[currentDeck];
+  document.getElementById("label").textContent=flipped?cfg.backLabel:cfg.frontLabel;
+  document.getElementById("sentence").textContent=flipped?current.back:current.front;
+  document.getElementById("sentence").className="sentence"+(flipped?" answer":"");
+  document.getElementById("hint").textContent=flipped?"Tippen für die Vorderseite":"Erst selbst beantworten, dann tippen";
 }
-function flip(){if(current){flipped=!flipped;show()}}
+
+function flip(){
+  if(current){flipped=!flipped;show();}
+}
+
 function rate(type){
-if(!current)return;
-let level=current.level||0;
-if(type==="again"){level=0;current.next=Date.now()+intervals[0]}
-else if(type==="hard"){level=Math.max(0,level);current.next=Date.now()+(intervals[Math.min(level,intervals.length-1)]/2)}
-else {level=Math.min(level+1,intervals.length-1);current.next=Date.now()+intervals[level]}
-current.level=level;current.last=todayKey();
-localStorage.setItem("bosanskiDay_"+todayKey(),"1");
-save();
+  if(!current)return;
+
+  let level=current.level||0;
+
+  if(type==="again"){
+    level=0;
+    current.next=Date.now()+intervals[0];
+  }else if(type==="hard"){
+    level=Math.max(0,level);
+    current.next=Date.now()+(intervals[Math.min(level,intervals.length-1)]/2);
+  }else{
+    level=Math.min(level+1,intervals.length-1);
+    current.next=Date.now()+intervals[level];
+  }
+
+  current.level=level;
+  current.last=todayKey();
+  localStorage.setItem("vocabDay_"+todayKey(),"1");
+  save();
 }
+
 function addCard(){
-let de=document.getElementById("de").value.trim(),bs=document.getElementById("bs").value.trim();
-if(!de||!bs){alert("Beide Felder ausfüllen.");return}
-cards.push({de,bs,level:0,next:Date.now(),last:null});
-document.getElementById("de").value="";document.getElementById("bs").value="";
-save();
+  const front=document.getElementById("front").value.trim();
+  const back=document.getElementById("back").value.trim();
+
+  if(!front||!back){
+    alert("Beide Felder ausfüllen.");
+    return;
+  }
+
+  cards().push({
+    id:crypto.randomUUID(),
+    front,
+    back,
+    level:0,
+    next:Date.now(),
+    last:null
+  });
+
+  document.getElementById("front").value="";
+  document.getElementById("back").value="";
+  save();
 }
-function del(i){if(confirm("Karte löschen?")){cards.splice(i,1);save()}}
-function shuffle(){cards.sort(()=>Math.random()-.5);save()}
-function esc(s){return s.replace(/[&<>"']/g,x=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[x]))}
+
+function del(i){
+  if(confirm("Karte löschen?")){
+    cards().splice(i,1);
+    save();
+  }
+}
+
+function shuffle(){
+  cards().sort(()=>Math.random()-.5);
+  save();
+}
+
+function esc(s){
+  return String(s).replace(/[&<>"']/g,x=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[x]));
+}
+
 function exportCards(){
-let b=new Blob([JSON.stringify(cards,null,2)],{type:"application/json"});
-let a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="bosanski-karte.json";a.click();
+  const b=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(b);
+  a.download="vokabeln-backup.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
+
 function importCards(e){
-let f=e.target.files[0];if(!f)return;
-let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!Array.isArray(x))throw 1;cards=x;save();}catch{alert("Ungültiges Backup.")}};r.readAsText(f);
+  const f=e.target.files[0];
+  if(!f)return;
+
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const x=JSON.parse(r.result);
+
+      if(x && x.decks && Array.isArray(x.decks.bosanski) && Array.isArray(x.decks.deutsch)){
+        data=x;
+      }else if(Array.isArray(x)){
+        // Alte Backup-Dateien werden als Bosnisch-Deck importiert.
+        data=defaultData();
+        data.decks.bosanski=x.map(c=>({
+          id:c.id||crypto.randomUUID(),
+          front:c.front??c.de??"",
+          back:c.back??c.bs??"",
+          level:c.level||0,
+          next:c.next||Date.now(),
+          last:c.last||null
+        }));
+      }else{
+        throw new Error("invalid");
+      }
+
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+      renderAll();
+      alert("Backup erfolgreich geladen.");
+    }catch(e){
+      alert("Ungültiges Backup.");
+    }
+  };
+  r.readAsText(f);
+  e.target.value="";
 }
+
 function resetProgress(){
-if(confirm("Nur Lernfortschritt zurücksetzen? Die Karten bleiben erhalten.")){
-cards.forEach(c=>{c.level=0;c.next=Date.now();c.last=null});save();
-}}
+  if(confirm("Nur den Lernfortschritt dieses Decks zurücksetzen? Die Karten bleiben erhalten.")){
+    cards().forEach(c=>{
+      c.level=0;
+      c.next=Date.now();
+      c.last=null;
+    });
+    save();
+  }
+}
+
+function switchDeck(deck){
+  if(!data.decks[deck])data.decks[deck]=[];
+  currentDeck=deck;
+  current=null;
+  flipped=false;
+  document.getElementById("search").value="";
+  renderAll();
+}
+
 let deferred;
-window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;document.getElementById("install").style.display="block"});
-document.getElementById("install").onclick=async()=>{if(deferred){deferred.prompt();await deferred.userChoice;deferred=null;document.getElementById("install").style.display="none"}};
-if("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js"));
+window.addEventListener("beforeinstallprompt",e=>{
+  e.preventDefault();
+  deferred=e;
+  document.getElementById("install").style.display="block";
+});
+
+document.getElementById("install").onclick=async()=>{
+  if(deferred){
+    deferred.prompt();
+    await deferred.userChoice;
+    deferred=null;
+    document.getElementById("install").style.display="none";
+  }
+};
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js"));
+}
+
 renderAll();
 </script>
 </body>
