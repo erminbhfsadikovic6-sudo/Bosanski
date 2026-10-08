@@ -243,6 +243,7 @@ function renderList(){
       <span class="tag">Stufe ${c.level||0}</span>
       <b>${esc(c.front)}</b><br>${esc(c.back)}
       <button onclick="editCard(${i})">✏️</button>
+      <button onclick="swapCard(${i})">↔️</button>
       <button onclick="del(${i})">🗑️</button>
     </div>`;
   }).join("")||"<p class='small'>Keine Karten gefunden.</p>";
@@ -348,6 +349,17 @@ function editCard(i){
 
   card.front=newFront;
   card.back=newBack;
+
+  save();
+}
+
+function swapCard(i){
+  const card=cards()[i];
+  if(!card)return;
+
+  const temp=card.front;
+  card.front=card.back;
+  card.back=temp;
 
   save();
 }
