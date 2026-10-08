@@ -238,9 +238,11 @@ function renderList(){
 
   document.getElementById("list").innerHTML=a.map(c=>{
     const i=cards().indexOf(c);
+
     return `<div class="item">
       <span class="tag">Stufe ${c.level||0}</span>
       <b>${esc(c.front)}</b><br>${esc(c.back)}
+      <button onclick="editCard(${i})">✏️</button>
       <button onclick="del(${i})">🗑️</button>
     </div>`;
   }).join("")||"<p class='small'>Keine Karten gefunden.</p>";
@@ -324,6 +326,30 @@ function del(i){
     cards().splice(i,1);
     save();
   }
+}
+
+function editCard(i){
+  const card=cards()[i];
+  if(!card)return;
+
+  const front=prompt("Vorderseite bearbeiten:",card.front);
+  if(front===null)return;
+
+  const back=prompt("Rückseite bearbeiten:",card.back);
+  if(back===null)return;
+
+  const newFront=front.trim();
+  const newBack=back.trim();
+
+  if(!newFront||!newBack){
+    alert("Beide Felder müssen ausgefüllt sein.");
+    return;
+  }
+
+  card.front=newFront;
+  card.back=newBack;
+
+  save();
 }
 
 function shuffle(){
