@@ -744,7 +744,7 @@ function defaultData(){
 
   return {
 
-    version: 3,
+    version: 4,
 
     decks: {
       bosanski: [],
@@ -755,7 +755,36 @@ function defaultData(){
 
       errors: [],
 
-      categories: {}
+      categories: {},
+
+      totalMessages: 0,
+
+      totalErrors: 0,
+
+      correctedErrors: 0,
+
+      vocabulary: [],
+
+      exercises: [],
+
+      stats: {
+        messages: 0,
+        errors: 0,
+        successfulExercises: 0,
+        failedExercises: 0
+      }
+
+    },
+
+    chatHistory: [],
+
+    settings: {
+
+      coachLanguage: "bosanski",
+
+      correctionLanguage: "deutsch",
+
+      difficulty: "adaptive"
 
     }
 
@@ -764,32 +793,64 @@ function defaultData(){
 }
 
 
-function ensureLearningProfile(){
+function ensureLearningProfile(target){
 
-  if(!data.learningProfile){
+  if(!target.learningProfile){
 
-    data.learningProfile = {
+    target.learningProfile = {
       errors: [],
-      categories: {}
+      categories: {},
+      totalMessages: 0,
+      totalErrors: 0,
+      correctedErrors: 0,
+      vocabulary: [],
+      exercises: [],
+      stats: {
+        messages: 0,
+        errors: 0,
+        successfulExercises: 0,
+        failedExercises: 0
+      }
     };
 
   }
 
-  if(!Array.isArray(data.learningProfile.errors)){
-
-    data.learningProfile.errors = [];
-
+  if(!Array.isArray(target.learningProfile.errors)){
+    target.learningProfile.errors = [];
   }
 
   if(
-    !data.learningProfile.categories ||
-    typeof data.learningProfile.categories !== "object"
+    !target.learningProfile.categories ||
+    typeof target.learningProfile.categories !== "object"
   ){
 
-    data.learningProfile.categories = {};
+    target.learningProfile.categories = {};
 
   }
 
+  if(!Array.isArray(target.learningProfile.vocabulary)){
+    target.learningProfile.vocabulary = [];
+  }
+
+  if(!Array.isArray(target.learningProfile.exercises)){
+    target.learningProfile.exercises = [];
+  }
+
+  if(
+    !target.learningProfile.stats ||
+    typeof target.learningProfile.stats !== "object"
+  ){
+
+    target.learningProfile.stats = {
+      messages: 0,
+      errors: 0,
+      successfulExercises: 0,
+      failedExercises: 0
+    };
+
+  }
+
+  return target;
 }
 
 
@@ -813,26 +874,27 @@ function loadData(){
           parsed.decks.deutsch = [];
         }
 
-        data = parsed;
-
-        ensureLearningProfile();
-
-        if(!data.version || data.version < 3){
-
-          data.version = 3;
-
-          localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(data)
-          );
-
+        if(!parsed.version){
+          parsed.version = 1;
         }
 
-        return data;
+        ensureLearningProfile(parsed);
+
+        if(parsed.version < 3){
+          parsed.version = 3;
+        }
+
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(parsed)
+        );
+
+        return parsed;
 
       }
 
-    }catch(e){
+    }
+    catch(e){
 
       console.error(
         "Fehler beim Laden der Daten:",
@@ -844,7 +906,9 @@ function loadData(){
   }
 
 
-  /* Alte Datenbank migrieren */
+  /* =========================
+     ALTE DATENBANK MIGRIEREN
+     ========================= */
 
   const oldRaw =
     localStorage.getItem(OLD_STORAGE_KEY);
@@ -869,10 +933,12 @@ function loadData(){
 
             front:
               c.de ??
+              c.front ??
               "",
 
             back:
               c.bs ??
+              c.back ??
               "",
 
             level:
@@ -891,7 +957,8 @@ function loadData(){
 
       }
 
-    }catch(e){
+    }
+    catch(e){
 
       console.error(
         "Fehler bei alter Migration:",
@@ -902,6 +969,8 @@ function loadData(){
 
   }
 
+
+  ensureLearningProfile(migrated);
 
   localStorage.setItem(
     STORAGE_KEY,
