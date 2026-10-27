@@ -2218,81 +2218,84 @@ function saveLearningErrors(
         item.correction === correction
       );
 
-    if(existing){
+if(existing){
 
-      existing.occurrences =
-        (existing.occurrences || 1) + 1;
+  existing.occurrences =
+    (existing.occurrences || 1) + 1;
 
-      existing.lastSeen =
-        now;
+  existing.lastSeen =
+    now;
 
-      existing.sourceMessage =
-        originalMessage;
+  existing.sourceMessage =
+    originalMessage;
 
-      /*
-       * Falls die KI beim nächsten Mal
-       * eine bessere Erklärung liefert,
-       * übernehmen wir sie.
-       */
-      if(error.explanation){
-        existing.explanation =
-          error.explanation;
-      }
+  if(error.explanation){
+    existing.explanation =
+      error.explanation;
+  }
 
-      if(error.category){
-        existing.category =
-          category;
-      }
+  if(error.category){
+    existing.category =
+      category;
+  }
 
-      if(error.difficulty){
-        existing.difficulty =
-          error.difficulty;
-      }
+  // Schwierigkeit automatisch anhand
+  // der Anzahl der Wiederholungen bestimmen
+  if(existing.occurrences >= 4){
 
-    }else{
+    existing.difficulty =
+      "schwer";
 
-      profile.errors.push({
-        id:
-          crypto.randomUUID(),
+  }else if(existing.occurrences >= 2){
 
-        original:
+    existing.difficulty =
+      "mittel";
 
-          original,
+  }else{
 
-        correction:
+    existing.difficulty =
+      "leicht";
 
-          correction,
+  }
 
-        category:
+}else{
 
-          category,
+  profile.errors.push({
+    id:
+      crypto.randomUUID(),
 
-        explanation:
+    original:
+      original,
 
-          error.explanation ||
-          "",
+    correction:
+      correction,
 
-        difficulty:
+    category:
+      category,
 
-          error.difficulty ||
-          "mittel",
+    explanation:
+      error.explanation ||
+      "",
 
-        occurrences:
-          1,
+    difficulty:
+      "leicht",
 
-        firstSeen:
-          now,
+    occurrences:
+      1,
 
-        lastSeen:
-          now,
+    firstSeen:
+      now,
 
-        sourceMessage:
-          originalMessage,
+    lastSeen:
+      now,
 
-        corrected:
-          false
-      });
-    }
+    sourceMessage:
+      originalMessage,
+
+    corrected:
+      false
+  });
+}
 
     /*
      * Kategorie aktualisieren
