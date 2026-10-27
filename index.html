@@ -1664,7 +1664,7 @@ function importCards(e){
 
         data = x;
 
-        ensureLearningProfile();
+        ensureLearningProfile(data);
 
       }
 
@@ -2124,7 +2124,7 @@ function saveLearningErrors(
   }
 
 
-  ensureLearningProfile();
+  ensureLearningProfile(data);
 
 
   errors.forEach(error => {
@@ -2209,7 +2209,7 @@ function saveLearningErrors(
 
 function renderLearningProfile(){
 
-  ensureLearningProfile();
+  ensureLearningProfile(data);
 
 
   const container =
