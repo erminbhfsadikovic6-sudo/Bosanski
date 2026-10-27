@@ -991,7 +991,7 @@ function cards(){
 
 function save(){
 
-  ensureLearningProfile();
+  ensureLearningProfile(data);
 
   localStorage.setItem(
     STORAGE_KEY,
@@ -999,7 +999,6 @@ function save(){
   );
 
   renderAll();
-
 }
 
 
