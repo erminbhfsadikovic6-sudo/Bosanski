@@ -300,6 +300,45 @@ select{
   border-radius:10px;
 }
 
+.profile-summary{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.profile-stat{
+  background:#f4f6f8;
+  border-radius:12px;
+  padding:14px;
+  text-align:center;
+}
+
+.profile-stat b{
+  display:block;
+  font-size:22px;
+}
+
+.profile-stat span{
+  font-size:12px;
+  opacity:.7;
+}
+
+.profile-error{
+  background:#f4f6f8;
+  border-radius:12px;
+  padding:12px;
+  margin-top:10px;
+}
+
+@media(max-width:600px){
+
+  .profile-summary{
+    grid-template-columns:1fr;
+  }
+
+}
+
 .empty-profile{
   color:#667085;
   font-size:14px
@@ -796,7 +835,6 @@ function defaultData(){
 function ensureLearningProfile(target){
 
   if(!target.learningProfile){
-
     target.learningProfile = {
       errors: [],
       categories: {},
@@ -812,47 +850,71 @@ function ensureLearningProfile(target){
         failedExercises: 0
       }
     };
-
   }
 
-  if(!Array.isArray(target.learningProfile.errors)){
-    target.learningProfile.errors = [];
-  }
+  const profile = target.learningProfile;
 
-  if(
-    !target.learningProfile.categories ||
-    typeof target.learningProfile.categories !== "object"
-  ){
-
-    target.learningProfile.categories = {};
-
-  }
-
-  if(!Array.isArray(target.learningProfile.vocabulary)){
-    target.learningProfile.vocabulary = [];
-  }
-
-  if(!Array.isArray(target.learningProfile.exercises)){
-    target.learningProfile.exercises = [];
+  if(!Array.isArray(profile.errors)){
+    profile.errors = [];
   }
 
   if(
-    !target.learningProfile.stats ||
-    typeof target.learningProfile.stats !== "object"
+    !profile.categories ||
+    typeof profile.categories !== "object"
   ){
+    profile.categories = {};
+  }
 
-    target.learningProfile.stats = {
+  if(!Array.isArray(profile.vocabulary)){
+    profile.vocabulary = [];
+  }
+
+  if(!Array.isArray(profile.exercises)){
+    profile.exercises = [];
+  }
+
+  if(
+    !profile.stats ||
+    typeof profile.stats !== "object"
+  ){
+    profile.stats = {
       messages: 0,
       errors: 0,
       successfulExercises: 0,
       failedExercises: 0
     };
+  }
 
+  if(typeof profile.totalMessages !== "number"){
+    profile.totalMessages = 0;
+  }
+
+  if(typeof profile.totalErrors !== "number"){
+    profile.totalErrors = 0;
+  }
+
+  if(typeof profile.correctedErrors !== "number"){
+    profile.correctedErrors = 0;
+  }
+
+  if(typeof profile.stats.messages !== "number"){
+    profile.stats.messages = 0;
+  }
+
+  if(typeof profile.stats.errors !== "number"){
+    profile.stats.errors = 0;
+  }
+
+  if(typeof profile.stats.successfulExercises !== "number"){
+    profile.stats.successfulExercises = 0;
+  }
+
+  if(typeof profile.stats.failedExercises !== "number"){
+    profile.stats.failedExercises = 0;
   }
 
   return target;
 }
-
 
 function loadData(){
 
@@ -2118,14 +2180,21 @@ function saveLearningErrors(
     !Array.isArray(errors) ||
     errors.length === 0
   ){
-
     return;
-
   }
-
 
   ensureLearningProfile(data);
 
+  const profile =
+    data.learningProfile;
+
+  const now =
+    new Date().toISOString();
+
+  profile.totalMessages++;
+
+  profile.stats.messages =
+    profile.totalMessages;
 
   errors.forEach(error => {
 
@@ -2133,77 +2202,139 @@ function saveLearningErrors(
       error.category ||
       "Sonstiges";
 
+    const original =
+      (error.original || "").trim();
 
-    const savedError = {
+    const correction =
+      (error.correction || "").trim();
 
-      id:
-        crypto.randomUUID(),
+    /*
+     * Prüfen, ob derselbe Fehler
+     * bereits früher aufgetreten ist.
+     */
+    const existing =
+      profile.errors.find(item =>
+        item.original === original &&
+        item.correction === correction
+      );
 
-      original:
-        error.original ||
-        "",
+    if(existing){
 
-      correction:
-        error.correction ||
-        "",
+      existing.occurrences =
+        (existing.occurrences || 1) + 1;
 
-      category:
+      existing.lastSeen =
+        now;
 
-        category,
+      existing.sourceMessage =
+        originalMessage;
 
-      explanation:
-        error.explanation ||
-        "",
+      /*
+       * Falls die KI beim nächsten Mal
+       * eine bessere Erklärung liefert,
+       * übernehmen wir sie.
+       */
+      if(error.explanation){
+        existing.explanation =
+          error.explanation;
+      }
 
-      difficulty:
-        error.difficulty ||
-        "mittel",
+      if(error.category){
+        existing.category =
+          category;
+      }
 
-      sourceMessage:
-        originalMessage,
+      if(error.difficulty){
+        existing.difficulty =
+          error.difficulty;
+      }
 
-      date:
-        new Date().toISOString()
+    }else{
 
-    };
+      profile.errors.push({
+        id:
+          crypto.randomUUID(),
 
+        original:
 
-    data.learningProfile.errors.push(
-      savedError
-    );
+          original,
 
+        correction:
 
-    if(
-      !data.learningProfile.categories[category]
-    ){
+          correction,
 
-      data.learningProfile.categories[category] = {
+        category:
 
-        count: 0,
+          category,
 
-        lastError: null
+        explanation:
 
-      };
+          error.explanation ||
+          "",
 
+        difficulty:
+
+          error.difficulty ||
+          "mittel",
+
+        occurrences:
+          1,
+
+        firstSeen:
+          now,
+
+        lastSeen:
+          now,
+
+        sourceMessage:
+          originalMessage,
+
+        corrected:
+          false
+      });
     }
 
+    /*
+     * Kategorie aktualisieren
+     */
+    if(
+      !profile.categories[category]
+    ){
+      profile.categories[category] = {
+        count: 0,
+        lastError: null,
+        uniqueErrors: 0
+      };
+    }
 
-    data.learningProfile.categories[category].count++;
+    const categoryData =
+      profile.categories[category];
 
-    data.learningProfile.categories[category].lastError =
-      new Date().toISOString();
+    categoryData.count++;
+
+    categoryData.lastError =
+      now;
+
+    categoryData.uniqueErrors =
+      profile.errors.filter(
+        item =>
+          item.category === category
+      ).length;
 
   });
 
+  profile.totalErrors +=
+    errors.length;
+
+  profile.stats.errors =
+    profile.totalErrors;
 
   localStorage.setItem(
     STORAGE_KEY,
     JSON.stringify(data)
   );
 
-
   renderLearningProfile();
-
 }
 
 
@@ -2211,47 +2342,42 @@ function renderLearningProfile(){
 
   ensureLearningProfile(data);
 
-
   const container =
     document.getElementById(
       "learningProfile"
     );
 
+  const profile =
+    data.learningProfile;
 
   const categories =
-    data.learningProfile.categories;
-
+    profile.categories;
 
   const names =
     Object.keys(categories);
 
-
   if(names.length === 0){
 
     container.innerHTML = `
-
       <div class="empty-profile">
-
         Noch keine Fehler gespeichert.
         Schreib ein paar Nachrichten
         mit dem Bosnisch-Coach.
-
       </div>
-
     `;
 
     return;
-
   }
 
-
+  /*
+   * Kategorien nach Fehleranzahl sortieren
+   */
   const sorted =
     names.sort(
       (a,b) =>
         categories[b].count -
         categories[a].count
     );
-
 
   const max =
     Math.max(
@@ -2261,13 +2387,45 @@ function renderLearningProfile(){
       )
     );
 
+  /*
+   * Häufigste konkrete Fehler
+   */
+  const frequentErrors =
+    [...profile.errors]
+      .sort(
+        (a,b) =>
+          (b.occurrences || 1) -
+          (a.occurrences || 1)
+      )
+      .slice(0,5);
 
-  container.innerHTML =
-    sorted.map(name => {
+  container.innerHTML = `
+
+    <div class="profile-summary">
+
+      <div class="profile-stat">
+        <b>${profile.totalMessages}</b>
+        <span>Nachrichten</span>
+      </div>
+
+      <div class="profile-stat">
+        <b>${profile.totalErrors}</b>
+        <span>Fehler</span>
+      </div>
+
+      <div class="profile-stat">
+        <b>${profile.errors.length}</b>
+        <span>verschiedene Fehler</span>
+      </div>
+
+    </div>
+
+    <h3>🎯 Deine größten Baustellen</h3>
+
+    ${sorted.map(name => {
 
       const count =
         categories[name].count;
-
 
       const percentage =
         Math.max(
@@ -2277,9 +2435,7 @@ function renderLearningProfile(){
           )
         );
 
-
       return `
-
         <div class="profile-category">
 
           <div class="profile-category-header">
@@ -2304,17 +2460,52 @@ function renderLearningProfile(){
           </div>
 
         </div>
-
       `;
 
-    }).join("");
+    }).join("")}
 
+    <h3>🔁 Häufig wiederholte Fehler</h3>
+
+    ${
+      frequentErrors.length === 0
+
+      ? `
+        <div class="empty-profile">
+          Noch keine wiederholten Fehler.
+        </div>
+      `
+
+      : frequentErrors.map(error => `
+          <div class="profile-error">
+
+            <div>
+              <b>
+                ${esc(error.category)}
+              </b>
+
+              ·
+
+              ${error.occurrences || 1}×
+            </div>
+
+            <div class="error-original">
+              ❌ ${esc(error.original)}
+            </div>
+
+            <div class="error-correction">
+              ✅ ${esc(error.correction)}
+            </div>
+
+            <div class="small">
+              ${esc(error.explanation)}
+            </div>
+
+          </div>
+        `).join("")
+    }
+
+  `;
 }
-
-
-/* =========================
-   DECK WECHSELN
-   ========================= */
 
 function switchDeck(
   deck
