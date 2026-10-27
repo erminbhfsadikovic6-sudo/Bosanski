@@ -294,6 +294,40 @@ select{
   overflow:hidden
 }
 
+.personal-exercise{
+  background:#f4f6f8;
+  border-radius:14px;
+  padding:16px;
+  margin-top:12px;
+}
+
+.exercise-question{
+  font-size:17px;
+  font-weight:600;
+  margin-bottom:14px;
+}
+
+.exercise-option{
+  width:100%;
+  text-align:left;
+  margin:7px 0;
+}
+
+.exercise-result{
+  margin-top:12px;
+  padding:12px;
+  border-radius:10px;
+  background:#fff;
+}
+
+.exercise-correct{
+  color:#18794e;
+}
+
+.exercise-wrong{
+  color:#b42318;
+}
+
 .profile-bar-fill{
   height:100%;
   background:#1769e0;
@@ -1129,7 +1163,9 @@ function renderAll(){
 
   renderLearningProfile();
 
-  nextCard();
+  nextCard();,
+
+  generatePersonalExercise();
 
 }
 
@@ -2543,6 +2579,332 @@ function renderLearningProfile(){
   `;
 }
 
+/* =========================
+   FÜR MICH
+   ========================= */
+
+let currentPersonalExercise = null;
+
+
+function generatePersonalExercise(){
+
+  ensureLearningProfile(data);
+
+  const profile =
+    data.learningProfile;
+
+  const errors =
+    profile.errors;
+
+  const container =
+    document.getElementById(
+      "personalExercise"
+    );
+
+  if(
+    !Array.isArray(errors) ||
+    errors.length === 0
+  ){
+
+    container.innerHTML = `
+      <div class="empty-profile">
+        Noch keine Übung verfügbar.
+        Schreib zuerst ein paar Nachrichten
+        mit dem Bosnisch-Coach.
+      </div>
+    `;
+
+    return;
+  }
+
+
+  /*
+   * Häufige Fehler bekommen
+   * eine höhere Wahrscheinlichkeit.
+   */
+
+  const weightedErrors = [];
+
+  errors.forEach(error => {
+
+    const weight =
+      Math.min(
+        6,
+        Math.max(
+          1,
+          error.occurrences || 1
+        )
+      );
+
+    for(
+      let i = 0;
+      i < weight;
+      i++
+    ){
+
+      weightedErrors.push(
+        error
+      );
+
+    }
+
+  });
+
+
+  const selected =
+    weightedErrors[
+      Math.floor(
+        Math.random() *
+        weightedErrors.length
+      )
+    ];
+
+
+  if(!selected){
+
+    container.innerHTML = `
+      <div class="empty-profile">
+        Keine passende Übung gefunden.
+      </div>
+    `;
+
+    return;
+  }
+
+
+  /*
+   * Richtige und falsche Antwort.
+   */
+
+  const correct =
+    selected.correction;
+
+  const wrong =
+    selected.original;
+
+
+  const options =
+    Math.random() < 0.5
+      ? [correct, wrong]
+      : [wrong, correct];
+
+
+  currentPersonalExercise = {
+    errorId:
+      selected.id,
+
+    correct:
+      correct,
+
+    answered:
+      false
+  };
+
+
+  container.innerHTML = `
+
+    <div class="personal-exercise">
+
+      <div class="exercise-question">
+
+        Welche Version ist richtig?
+
+      </div>
+
+
+      ${options.map((option, index) => `
+
+        <button
+          class="exercise-option"
+          onclick="answerPersonalExercise(${index})">
+
+          ${esc(option)}
+
+        </button>
+
+      `).join("")}
+
+
+      <div class="small">
+
+        Schwerpunkt:
+        <b>${esc(selected.category)}</b>
+
+        ·
+
+        Schwierigkeit:
+        <b>${esc(selected.difficulty || "leicht")}</b>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  currentPersonalExercise.options =
+    options;
+
+}
+
+
+function answerPersonalExercise(index){
+
+  if(
+    !currentPersonalExercise ||
+    currentPersonalExercise.answered
+  ){
+
+    return;
+  }
+
+
+  const container =
+    document.getElementById(
+      "personalExercise"
+    );
+
+
+  const selected =
+    data.learningProfile.errors.find(
+      error =>
+        error.id ===
+        currentPersonalExercise.errorId
+    );
+
+
+  if(!selected){
+    return;
+  }
+
+
+  const chosen =
+    currentPersonalExercise
+      .options[index];
+
+
+  const correct =
+    currentPersonalExercise
+      .correct;
+
+
+  const isCorrect =
+    chosen === correct;
+
+
+  currentPersonalExercise.answered =
+    true;
+
+
+  ensureLearningProfile(data);
+
+
+  data.learningProfile.exercises.push({
+
+    id:
+      crypto.randomUUID(),
+
+    errorId:
+      selected.id,
+
+    correct:
+      isCorrect,
+
+    date:
+      new Date().toISOString()
+
+  });
+
+
+  if(isCorrect){
+
+    data.learningProfile
+      .stats
+      .successfulExercises++;
+
+    data.learningProfile
+      .correctedErrors++;
+
+  }else{
+
+    data.learningProfile
+      .stats
+      .failedExercises++;
+
+  }
+
+
+  const resultClass =
+    isCorrect
+      ? "exercise-correct"
+      : "exercise-wrong";
+
+
+  const resultText =
+    isCorrect
+
+      ? `
+        ✅ Richtig!
+
+        <br>
+
+        <span class="small">
+          Sehr gut. Diese Form ist korrekt.
+        </span>
+      `
+
+      : `
+        ❌ Nicht ganz.
+
+        <br>
+
+        <span class="small">
+          Richtig wäre:
+          <b>${esc(correct)}</b>
+        </span>
+      `;
+
+
+  container.innerHTML = `
+
+    <div class="personal-exercise">
+
+      <div class="${resultClass}">
+
+        ${resultText}
+
+      </div>
+
+
+      <div class="small">
+
+        Kategorie:
+        <b>${esc(selected.category)}</b>
+
+        ·
+
+        Dieser Fehler wurde bereits
+        <b>${selected.occurrences || 1}×</b>
+        erkannt.
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(data)
+  );
+
+}
+
+/* =========================
+   DECK WECHSELN
+   ========================= */  
+  
 function switchDeck(
   deck
 ){
