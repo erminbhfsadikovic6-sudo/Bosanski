@@ -2928,19 +2928,6 @@ function answerPersonalExercise(index){
     );
 
 
-  const selected =
-    data.learningProfile.errors.find(
-      error =>
-        error.id ===
-        currentPersonalExercise.errorId
-    );
-
-
-  if(!selected){
-    return;
-  }
-
-
   const chosen =
     currentPersonalExercise
       .options[index];
@@ -2962,22 +2949,56 @@ function answerPersonalExercise(index){
   ensureLearningProfile(data);
 
 
+  /*
+   * ==========================================
+   * ZUGEHÖRIGEN FEHLER SUCHEN
+   * ==========================================
+   */
+
+  const selected =
+    data.learningProfile.errors.find(
+      error =>
+        error.id ===
+        currentPersonalExercise.errorId
+    );
+
+
+  /*
+   * ==========================================
+   * ÜBUNGSERGEBNIS SPEICHERN
+   * ==========================================
+   */
+
   data.learningProfile.exercises.push({
 
     id:
       crypto.randomUUID(),
 
     errorId:
-      selected.id,
+      currentPersonalExercise.errorId,
 
     correct:
       isCorrect,
 
     date:
-      new Date().toISOString()
+      new Date().toISOString(),
+
+    category:
+      currentPersonalExercise.category ||
+      "Sonstiges",
+
+    difficulty:
+      currentPersonalExercise.difficulty ||
+      "leicht"
 
   });
 
+
+  /*
+   * ==========================================
+   * STATISTIK AKTUALISIEREN
+   * ==========================================
+   */
 
   if(isCorrect){
 
@@ -2996,6 +3017,12 @@ function answerPersonalExercise(index){
 
   }
 
+
+  /*
+   * ==========================================
+   * ERGEBNIS + ERKLÄRUNG
+   * ==========================================
+   */
 
   const resultClass =
     isCorrect
@@ -3028,9 +3055,15 @@ function answerPersonalExercise(index){
       `;
 
 
+  const explanation =
+    currentPersonalExercise
+      .explanation;
+
+
   container.innerHTML = `
 
     <div class="personal-exercise">
+
 
       <div class="${resultClass}">
 
@@ -3039,34 +3072,99 @@ function answerPersonalExercise(index){
       </div>
 
 
+      ${
+        explanation
+          ? `
+
+            <div class="exercise-result">
+
+              <b>💡 Erklärung</b>
+
+              <br>
+
+              <span class="small">
+
+                ${esc(explanation)}
+
+              </span>
+
+            </div>
+
+          `
+          : ""
+      }
+
+
       <div class="small">
 
-        Kategorie:
-        <b>${esc(selected.category)}</b>
+        Schwerpunkt:
+        <b>
+          ${esc(
+            currentPersonalExercise.category ||
+            "Sonstiges"
+          )}
+        </b>
 
         ·
 
-        Dieser Fehler wurde bereits
-        <b>${selected.occurrences || 1}×</b>
-        erkannt.
+        Schwierigkeit:
+        <b>
+          ${esc(
+            currentPersonalExercise.difficulty ||
+            "leicht"
+          )}
+        </b>
 
       </div>
+
+
+      ${
+        selected
+          ? `
+
+            <div class="small">
+
+              Dieser Fehler wurde bereits
+              <b>
+                ${selected.occurrences || 1}×
+              </b>
+              erkannt.
+
+            </div>
+
+          `
+          : ""
+      }
+
 
     </div>
 
   `;
 
 
+  /*
+   * ==========================================
+   * DATEN SPEICHERN
+   * ==========================================
+   */
+
   localStorage.setItem(
     STORAGE_KEY,
     JSON.stringify(data)
   );
 
-   setTimeout(() => {
+
+  /*
+   * ==========================================
+   * NÄCHSTE ÜBUNG
+   * ==========================================
+   */
+
+  setTimeout(() => {
 
     generatePersonalExercise();
 
-  }, 1200);
+  }, 1500);
 
 }
 
