@@ -2965,7 +2965,90 @@ function answerPersonalExercise(index){
 
   /*
    * ==========================================
-   * ÜBUNGSERGEBNIS SPEICHERN
+   * FEHLER-LERNFORTSCHRITT AKTUALISIEREN
+   * ==========================================
+   */
+
+  if(selected){
+
+    /*
+     * Falls der Fehler noch keine
+     * Übungsstatistik besitzt
+     */
+
+    if(!selected.exerciseStats){
+
+      selected.exerciseStats = {
+
+        attempts: 0,
+
+        correct: 0,
+
+        wrong: 0,
+
+        mastery: 0,
+
+        lastAttempt:
+          null
+
+      };
+
+    }
+
+
+    /*
+     * Anzahl der Versuche erhöhen
+     */
+
+    selected.exerciseStats.attempts++;
+
+
+    /*
+     * Richtig / falsch speichern
+     */
+
+    if(isCorrect){
+
+      selected.exerciseStats.correct++;
+
+    }else{
+
+      selected.exerciseStats.wrong++;
+
+    }
+
+
+    /*
+     * Beherrschung berechnen
+     *
+     * Beispiel:
+     *
+     * 4 richtig / 5 Versuche
+     * = 80%
+     */
+
+    selected.exerciseStats.mastery =
+      Math.round(
+        (
+          selected.exerciseStats.correct /
+          selected.exerciseStats.attempts
+        ) * 100
+      );
+
+
+    /*
+     * Zeitpunkt des letzten Versuchs
+     */
+
+    selected.exerciseStats.lastAttempt =
+      new Date().toISOString();
+
+  }
+
+
+  /*
+   * ==========================================
+   * ÜBUNGSERGEBNIS GLOBAL SPEICHERN
    * ==========================================
    */
 
@@ -2996,7 +3079,7 @@ function answerPersonalExercise(index){
 
   /*
    * ==========================================
-   * STATISTIK AKTUALISIEREN
+   * GLOBALE STATISTIK AKTUALISIEREN
    * ==========================================
    */
 
@@ -3020,7 +3103,7 @@ function answerPersonalExercise(index){
 
   /*
    * ==========================================
-   * ERGEBNIS
+   * ERGEBNIS-KLASSE
    * ==========================================
    */
 
@@ -3029,6 +3112,12 @@ function answerPersonalExercise(index){
       ? "exercise-correct"
       : "exercise-wrong";
 
+
+  /*
+   * ==========================================
+   * ERGEBNIS-TEXT
+   * ==========================================
+   */
 
   const resultText =
     isCorrect
@@ -3064,6 +3153,19 @@ function answerPersonalExercise(index){
   const explanation =
     currentPersonalExercise
       .explanation;
+
+
+  /*
+   * ==========================================
+   * BEHERRSCHUNG ANZEIGEN
+   * ==========================================
+   */
+
+  const mastery =
+    selected &&
+    selected.exerciseStats
+      ? selected.exerciseStats.mastery
+      : null;
 
 
   /*
@@ -3110,6 +3212,7 @@ function answerPersonalExercise(index){
       <div class="small">
 
         Schwerpunkt:
+
         <b>
           ${esc(
             currentPersonalExercise.category ||
@@ -3120,6 +3223,7 @@ function answerPersonalExercise(index){
         ·
 
         Schwierigkeit:
+
         <b>
           ${esc(
             currentPersonalExercise.difficulty ||
@@ -3137,10 +3241,31 @@ function answerPersonalExercise(index){
             <div class="small">
 
               Dieser Fehler wurde bereits
+
               <b>
                 ${selected.occurrences || 1}×
               </b>
-              erkannt.
+
+              im Chat erkannt.
+
+            </div>
+
+          `
+          : ""
+      }
+
+
+      ${
+        mastery !== null
+          ? `
+
+            <div class="small">
+
+              📊 Beherrschung dieses Fehlers:
+
+              <b>
+                ${mastery}%
+              </b>
 
             </div>
 
