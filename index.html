@@ -3020,7 +3020,7 @@ function answerPersonalExercise(index){
 
   /*
    * ==========================================
-   * ERGEBNIS + ERKLÄRUNG
+   * ERGEBNIS
    * ==========================================
    */
 
@@ -3055,10 +3055,22 @@ function answerPersonalExercise(index){
       `;
 
 
+  /*
+   * ==========================================
+   * KI-ERKLÄRUNG
+   * ==========================================
+   */
+
   const explanation =
     currentPersonalExercise
       .explanation;
 
+
+  /*
+   * ==========================================
+   * ERGEBNIS ANZEIGEN
+   * ==========================================
+   */
 
   container.innerHTML = `
 
@@ -3137,6 +3149,16 @@ function answerPersonalExercise(index){
       }
 
 
+      <button
+        class="exercise-option"
+        onclick="generatePersonalExercise()"
+        style="margin-top: 15px;">
+
+        ➡️ Nächste Übung
+
+      </button>
+
+
     </div>
 
   `;
@@ -3153,21 +3175,7 @@ function answerPersonalExercise(index){
     JSON.stringify(data)
   );
 
-
-  /*
-   * ==========================================
-   * NÄCHSTE ÜBUNG
-   * ==========================================
-   */
-
-  setTimeout(() => {
-
-    generatePersonalExercise();
-
-  }, 1500);
-
 }
-
 /* =========================
    DECK WECHSELN
    ========================= */  
