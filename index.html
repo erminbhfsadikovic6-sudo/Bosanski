@@ -2586,7 +2586,7 @@ function renderLearningProfile(){
 let currentPersonalExercise = null;
 
 
-function generatePersonalExercise(){
+async function generatePersonalExercise(){
 
   ensureLearningProfile(data);
 
@@ -2600,6 +2600,11 @@ function generatePersonalExercise(){
     document.getElementById(
       "personalExercise"
     );
+
+
+  /*
+   * Keine Fehler vorhanden
+   */
 
   if(
     !Array.isArray(errors) ||
@@ -2615,135 +2620,293 @@ function generatePersonalExercise(){
     `;
 
     return;
+
   }
 
 
   /*
-   * Häufige Fehler bekommen
-   * eine höhere Wahrscheinlichkeit.
+   * Ladeanzeige
    */
-
-  const weightedErrors = [];
-
-  errors.forEach(error => {
-
-    const weight =
-      Math.min(
-        6,
-        Math.max(
-          1,
-          error.occurrences || 1
-        )
-      );
-
-    for(
-      let i = 0;
-      i < weight;
-      i++
-    ){
-
-      weightedErrors.push(
-        error
-      );
-
-    }
-
-  });
-
-
-  const selected =
-    weightedErrors[
-      Math.floor(
-        Math.random() *
-        weightedErrors.length
-      )
-    ];
-
-
-  if(!selected){
-
-    container.innerHTML = `
-      <div class="empty-profile">
-        Keine passende Übung gefunden.
-      </div>
-    `;
-
-    return;
-  }
-
-
-  /*
-   * Richtige und falsche Antwort.
-   */
-
-  const correct =
-    selected.correction;
-
-  const wrong =
-    selected.original;
-
-
-  const options =
-    Math.random() < 0.5
-      ? [correct, wrong]
-      : [wrong, correct];
-
-
-  currentPersonalExercise = {
-    errorId:
-      selected.id,
-
-    correct:
-      correct,
-
-    answered:
-      false
-  };
-
 
   container.innerHTML = `
-
     <div class="personal-exercise">
 
       <div class="exercise-question">
 
-        Welche Version ist richtig?
+        🧠 Deine persönliche Übung wird erstellt...
 
       </div>
 
-
-      ${options.map((option, index) => `
-
-        <button
-          class="exercise-option"
-          onclick="answerPersonalExercise(${index})">
-
-          ${esc(option)}
-
-        </button>
-
-      `).join("")}
-
-
       <div class="small">
 
-        Schwerpunkt:
-        <b>${esc(selected.category)}</b>
-
-        ·
-
-        Schwierigkeit:
-        <b>${esc(selected.difficulty || "leicht")}</b>
+        Die KI analysiert deine bisherigen
+        Fehler und erstellt eine passende Aufgabe.
 
       </div>
 
     </div>
-
   `;
 
 
-  currentPersonalExercise.options =
-    options;
+  try {
+
+    /*
+     * ==========================================
+     * WORKER AUFRUFEN
+     * ==========================================
+     */
+
+    const response = await fetch(
+      "https://bosian-chatbot.erminbhfsadikovic6.workers.dev",
+      {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
+
+        body: JSON.stringify({
+
+          mode:
+            "exercise",
+
+          learningProfile:
+            profile
+
+        })
+
+      }
+    );
+
+
+    /*
+     * ==========================================
+     * WORKER-ANTWORT
+     * ==========================================
+     */
+
+    const result =
+      await response.json();
+
+
+    /*
+     * Fehler vom Worker
+     */
+
+    if(
+      !response.ok ||
+      !result.exercise
+    ){
+
+      throw new Error(
+        result.error ||
+        "Keine Übung erhalten."
+      );
+
+    }
+
+
+    const exercise =
+      result.exercise;
+
+
+    /*
+     * ==========================================
+     * ÜBUNG VALIDIEREN
+     * ==========================================
+     */
+
+    if(
+      exercise.type !==
+      "multiple_choice"
+    ){
+
+      throw new Error(
+        "Unbekannter Übungstyp."
+      );
+
+    }
+
+
+    if(
+      !Array.isArray(
+        exercise.options
+      ) ||
+      exercise.options.length !== 3
+    ){
+
+      throw new Error(
+        "Die KI hat keine drei Antwortmöglichkeiten geliefert."
+      );
+
+    }
+
+
+    if(
+      typeof exercise.correctIndex !==
+      "number" ||
+      exercise.correctIndex < 0 ||
+      exercise.correctIndex > 2
+    ){
+
+      throw new Error(
+        "Die KI hat keinen gültigen correctIndex geliefert."
+      );
+
+    }
+
+
+    /*
+     * ==========================================
+     * RICHTIGE ANTWORT BESTIMMEN
+     * ==========================================
+     */
+
+    const correct =
+      exercise.options[
+        exercise.correctIndex
+      ];
+
+
+    /*
+     * ==========================================
+     * AKTUELLE ÜBUNG SPEICHERN
+     * ==========================================
+     */
+
+    currentPersonalExercise = {
+
+      errorId:
+        exercise.targetErrorId,
+
+      correct:
+        correct,
+
+      options:
+        exercise.options,
+
+      question:
+        exercise.question,
+
+      category:
+        exercise.category,
+
+      difficulty:
+        exercise.difficulty,
+
+      explanation:
+        exercise.explanation,
+
+      answered:
+        false
+
+    };
+
+
+    /*
+     * ==========================================
+     * ÜBUNG ANZEIGEN
+     * ==========================================
+     */
+
+    container.innerHTML = `
+
+      <div class="personal-exercise">
+
+
+        <div class="exercise-question">
+
+          ${esc(
+            exercise.question
+          )}
+
+        </div>
+
+
+        ${exercise.options.map(
+          (option, index) => `
+
+            <button
+              class="exercise-option"
+              onclick="answerPersonalExercise(${index})">
+
+              ${esc(option)}
+
+            </button>
+
+          `
+        ).join("")}
+
+
+        <div class="small">
+
+          Schwerpunkt:
+          <b>
+            ${esc(
+              exercise.category ||
+              "Sonstiges"
+            )}
+          </b>
+
+          ·
+
+          Schwierigkeit:
+          <b>
+            ${esc(
+              exercise.difficulty ||
+              "leicht"
+            )}
+          </b>
+
+        </div>
+
+
+      </div>
+
+    `;
+
+
+  } catch(error) {
+
+    /*
+     * ==========================================
+     * FEHLERANZEIGE
+     * ==========================================
+     */
+
+    console.error(
+      "Fehler bei KI-Übung:",
+      error
+    );
+
+
+    container.innerHTML = `
+
+      <div class="personal-exercise">
+
+        <div class="exercise-wrong">
+
+          ❌ Die persönliche Übung konnte
+          gerade nicht erstellt werden.
+
+        </div>
+
+        <div class="small">
+
+          ${esc(
+            error.message ||
+            "Unbekannter Fehler"
+          )}
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
 
 }
 
