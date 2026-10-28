@@ -1627,13 +1627,19 @@ function show(){
     (flipped ? " answer" : "");
 
   const details =
-    document.getElementById("vocabDetails");
+    document.getElementById(
+      "vocabDetails"
+    );
 
   const example =
-    document.getElementById("vocabExample");
+    document.getElementById(
+      "vocabExample"
+    );
 
   const partOfSpeech =
-    document.getElementById("vocabPartOfSpeech");
+    document.getElementById(
+      "vocabPartOfSpeech"
+    );
 
   if(
     flipped &&
@@ -1660,10 +1666,12 @@ function show(){
   }else{
 
     example.textContent = "";
+
     partOfSpeech.textContent = "";
 
     details.style.display =
       "none";
+
   }
 
   document.getElementById(
@@ -2743,111 +2751,186 @@ vocabularySelectionButton.onclick =
 
 async function saveVocabularyFromPreview(){
 
-  const bosnian =
-    document
-      .getElementById("vocabBosnian")
-      ?.value
-      .trim();
+  try{
 
-  const translation =
-    document
-      .getElementById("vocabTranslation")
-      ?.value
-      .trim();
+    const bosnian =
+      document
+        .getElementById("vocabBosnian")
+        ?.value
+        .trim();
 
-  const example =
-    document
-      .getElementById("vocabExample")
-      ?.value
-      .trim();
+    const translation =
+      document
+        .getElementById("vocabTranslation")
+        ?.value
+        .trim();
 
-  if(
-    !bosnian ||
-    !translation
-  ){
+    const example =
+      document
+        .getElementById("vocabExample")
+        ?.value
+        .trim();
 
-    showVocabularyError(
-      "Bosnisch und Übersetzung müssen ausgefüllt sein."
-    );
+    if(
+      !bosnian ||
+      !translation
+    ){
 
-    return;
-  }
+      showVocabularyError(
+        "Bosnisch und Übersetzung müssen ausgefüllt sein."
+      );
 
-  const deck =
-    data.decks.bosanski;
+      return;
+    }
 
-  const bosnianKey =
-    normalizeVocabularyValue(
-      bosnian
-    );
+    const deck =
+      data.decks.bosanski;
 
-  const translationKey =
-    normalizeVocabularyValue(
-      translation
-    );
+    if(!Array.isArray(deck)){
 
-  const duplicate =
-    deck.find(
-      card =>
-        normalizeVocabularyValue(
-          card.back
-        ) === bosnianKey ||
-
-        normalizeVocabularyValue(
-          card.front
-        ) === translationKey
-    );
-
-  if(duplicate){
-
-    showVocabularyError(
-      `Diese Vokabel existiert bereits: ${duplicate.back} → ${duplicate.front}`
-    );
-
-    return;
-  }
-
-  deck.push({
-
-    id: crypto.randomUUID(),
-
-    front: translation,
-
-    back: bosnian,
-
-    level: 0,
-
-    next: Date.now(),
-
-    last: null,
-
-    vocabulary: {
-
-      original:
-        currentVocabularyPreview?.original ||
-        selectedVocabularyText,
-
-      example,
-
-      partOfSpeech:
-        currentVocabularyPreview?.partOfSpeech ||
-        ""
+      throw new Error(
+        "Das Bosnisch-Kartendeck wurde nicht gefunden."
+      );
 
     }
 
-  });
+    const bosnianKey =
+      normalizeVocabularyValue(
+        bosnian
+      );
 
-  save();
+    const translationKey =
+      normalizeVocabularyValue(
+        translation
+      );
 
-  closeVocabularyModal();
+    const duplicate =
+      deck.find(
+        card =>
+          normalizeVocabularyValue(
+            card.back
+          ) === bosnianKey ||
 
-  window
-    .getSelection()
-    ?.removeAllRanges();
+          normalizeVocabularyValue(
+            card.front
+          ) === translationKey
+      );
 
-  alert(
-    `📚 Gespeichert!\n\n${bosnian} → ${translation}`
-  );
+    if(duplicate){
+
+      showVocabularyError(
+        `Diese Vokabel existiert bereits: ${duplicate.back} → ${duplicate.front}`
+      );
+
+      return;
+    }
+
+    const newCard = {
+
+      id: crypto.randomUUID(),
+
+      front: translation,
+
+      back: bosnian,
+
+      level: 0,
+
+      next: Date.now(),
+
+      last: null,
+
+      vocabulary: {
+
+        original:
+          currentVocabularyPreview?.original ||
+          selectedVocabularyText,
+
+        example:
+          example,
+
+        partOfSpeech:
+          currentVocabularyPreview?.partOfSpeech ||
+          ""
+
+      }
+
+    };
+
+    deck.push(
+      newCard
+    );
+
+    save();
+
+    current =
+      newCard;
+
+    flipped =
+      false;
+
+    closeVocabularyModal();
+
+    window
+      .getSelection()
+      ?.removeAllRanges();
+
+    show();
+
+    alert(
+      `📚 Gespeichert!\n\n${bosnian} → ${translation}`
+    );
+
+  }catch(error){
+
+    console.error(
+      "Fehler beim Speichern der Vokabel:",
+      error
+    );
+
+    const content =
+      document.getElementById(
+        "vocabModalContent"
+      );
+
+    if(content){
+
+      content.innerHTML = `
+
+        <div
+          class="vocab-modal-error"
+          style="display:block"
+        >
+
+          ❌ Fehler beim Speichern:
+
+          <br><br>
+
+          ${esc(
+            error.message ||
+            "Unbekannter Fehler"
+          )}
+
+        </div>
+
+        <div
+          class="vocab-modal-actions"
+        >
+
+          <button
+            type="button"
+            onclick="closeVocabularyModal()"
+          >
+            Schließen
+          </button>
+
+        </div>
+
+      `;
+
+    }
+
+  }
+
 }
 
 
