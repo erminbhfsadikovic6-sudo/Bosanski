@@ -675,6 +675,28 @@ select{
   width:100%;
 }
 
+.grammar-number-switch{
+  display:flex;
+  gap:8px;
+  margin-bottom:12px;
+}
+
+.grammar-number-btn{
+  flex:1;
+  padding:10px 14px;
+  border:1px solid #d0d5dd;
+  border-radius:10px;
+  background:#fff;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.grammar-number-btn.active{
+  background:#1769e0;
+  color:#fff;
+  border-color:#1769e0;
+}
+
 @media(max-width:520px){
 
   .case-row{
@@ -1096,6 +1118,26 @@ select{
     Hier siehst du zuerst die wichtigsten Formen im Singular.
   </p>
 
+<div class="grammar-number-switch">
+
+  <button
+    type="button"
+    class="grammar-number-btn active"
+    onclick="setGrammarNumber('singular')">
+    Singular
+  </button>
+
+  <button
+    type="button"
+    class="grammar-number-btn"
+    onclick="setGrammarNumber('plural')">
+    Plural
+  </button>
+
+</div>
+
+<div id="grammarSingular" class="grammar-number-table">
+  
 <div class="case-table">
 
   <div class="case-row case-head">
@@ -1154,7 +1196,71 @@ select{
     <div>bratom · ženom · selom</div>
   </div>
 
+ </div>
+  
 </div>
+
+  <div id="grammarPlural" class="grammar-number-table" style="display:none;">
+
+  <div class="case-table">
+
+    <div class="case-row case-head">
+      <div>Fall</div>
+      <div>Frage</div>
+      <div>Typische Endung</div>
+      <div>Beispiele</div>
+    </div>
+
+    <div class="case-row">
+      <div><b>Nominativ</b></div>
+      <div>Wer? Was?</div>
+      <div>-i / -e / -a</div>
+      <div>gradovi · žene · sela</div>
+    </div>
+
+    <div class="case-row">
+      <div><b>Genitiv</b></div>
+      <div>Wessen?</div>
+      <div>-a / -i</div>
+      <div>gradova · žena · sela</div>
+    </div>
+
+    <div class="case-row">
+      <div><b>Dativ</b></div>
+      <div>Wem?</div>
+      <div>-ima / -ama</div>
+      <div>gradovima · ženama · selima</div>
+    </div>
+
+    <div class="case-row">
+      <div><b>Akkusativ</b></div>
+      <div>Wen? Was?</div>
+      <div>wie Nominativ / Genitiv</div>
+      <div>gradove · žene · sela</div>
+    </div>
+
+    <div class="case-row">
+      <div><b>Vokativ</b></div>
+      <div>Anrede</div>
+      <div>oft wie Nominativ</div>
+      <div>gradovi · žene · sela</div>
+    </div>
+
+    <div class="case-row">
+      <div><b>Lokativ</b></div>
+      <div>Wo? Worüber?</div>
+      <div>-ima / -ama</div>
+      <div>gradovima · ženama · selima</div>
+    </div>
+
+    <div class="case-row">
+      <div><b>Instrumental</b></div>
+      <div>Womit? Mit wem?</div>
+      <div>-ima / -ama</div>
+      <div>gradovima · ženama · selima</div>
+    </div>
+
+  </div>
   
 </div>
 
@@ -4646,7 +4752,6 @@ const grammarExercises = [
 
 ];
 
-
 let currentGrammarExercise = null;
 
 let grammarStats = JSON.parse(
@@ -4664,7 +4769,46 @@ function getGrammarKey(exercise){
   return exercise.case;
 }
 
+let grammarNumber = "singular";
 
+function setGrammarNumber(number){
+
+  grammarNumber = number;
+
+  const singular =
+    document.getElementById("grammarSingular");
+
+  const plural =
+    document.getElementById("grammarPlural");
+
+  const buttons =
+    document.querySelectorAll(".grammar-number-btn");
+
+  if(!singular || !plural)return;
+
+  singular.style.display =
+    number === "singular"
+      ? "block"
+      : "none";
+
+  plural.style.display =
+    number === "plural"
+      ? "block"
+      : "none";
+
+  buttons.forEach(button => {
+
+    button.classList.toggle(
+      "active",
+      button.textContent
+        .trim()
+        .toLowerCase() === number
+    );
+
+  });
+
+}
+  
 function generateGrammarExercise(){
 
   const container =
