@@ -603,7 +603,7 @@ select{
 
 .case-row{
   display:grid;
-  grid-template-columns:1.3fr 1fr 1fr;
+  grid-template-columns:1.2fr 1fr 1fr 1.1fr;
   gap:8px;
   padding:11px 10px;
   border-bottom:1px solid #e3e6ea;
@@ -678,7 +678,7 @@ select{
 @media(max-width:520px){
 
   .case-row{
-    grid-template-columns:1.3fr 1fr 1fr;
+    grid-template-columns:1.2fr 1fr 1fr 1.1fr;
     font-size:12px;
     padding:9px 7px;
   }
@@ -1095,58 +1095,66 @@ select{
     Die Fälle bestimmen, welche Form ein Wort im Satz bekommt.
   </p>
 
-  <div class="case-table">
+<div class="case-table">
 
-    <div class="case-row case-head">
-      <div>Fall</div>
-      <div>Frage</div>
-      <div>Beispiel</div>
-    </div>
+<div class="case-row case-head">
+  <div>Fall</div>
+  <div>Frage</div>
+  <div>Typische Endung</div>
+  <div>Beispiel</div>
+</div>
 
-    <div class="case-row">
-      <div><b>Nominativ</b></div>
-      <div>Wer? Was?</div>
-      <div>grad</div>
-    </div>
+<div class="case-row">
+  <div><b>Nominativ</b></div>
+  <div>Wer? Was?</div>
+  <div>-</div>
+  <div>grad</div>
+</div>
 
-    <div class="case-row">
-      <div><b>Genitiv</b></div>
-      <div>Wessen?</div>
-      <div>grada</div>
-    </div>
+<div class="case-row">
+  <div><b>Genitiv</b></div>
+  <div>Wessen?</div>
+  <div>-a</div>
+  <div>grada</div>
+</div>
 
-    <div class="case-row">
-      <div><b>Dativ</b></div>
-      <div>Wem?</div>
-      <div>gradu</div>
-    </div>
+<div class="case-row">
+  <div><b>Dativ</b></div>
+  <div>Wem?</div>
+  <div>-u</div>
+  <div>gradu</div>
+</div>
 
-    <div class="case-row">
-      <div><b>Akkusativ</b></div>
-      <div>Wen? Was?</div>
-      <div>grad</div>
-    </div>
+<div class="case-row">
+  <div><b>Akkusativ</b></div>
+  <div>Wen? Was?</div>
+  <div>- / -a</div>
+  <div>grad</div>
+</div>
 
-    <div class="case-row">
-      <div><b>Vokativ</b></div>
-      <div>Anrede</div>
-      <div>grade</div>
-    </div>
+<div class="case-row">
+  <div><b>Vokativ</b></div>
+  <div>Anrede</div>
+  <div>-e</div>
+  <div>grade</div>
+</div>
 
-    <div class="case-row">
-      <div><b>Lokativ</b></div>
-      <div>Wo? Worüber?</div>
-      <div>gradu</div>
-    </div>
+<div class="case-row">
+  <div><b>Lokativ</b></div>
+  <div>Wo?</div>
+  <div>-u</div>
+  <div>gradu</div>
+</div>
 
-    <div class="case-row">
-      <div><b>Instrumental</b></div>
-      <div>Womit?</div>
-      <div>gradom</div>
-    </div>
+<div class="case-row">
+  <div><b>Instrumental</b></div>
+  <div>Womit? Mit wem?</div>
+  <div>-om</div>
+  <div>bratom</div>
+</div>
 
-  </div>
-
+</div>
+  
 </div>
 
 
@@ -4493,24 +4501,24 @@ function answerPersonalExercise(index){
 const grammarExercises = [
 
   {
+    sentence: "Centar ___ (grad) je lijep.",
+    answer: "grada",
+    case: "Genitiv",
+    explanation: "Genitiv zeigt hier Zugehörigkeit: das Zentrum der Stadt."
+  },
+
+  {
     sentence: "Idem prema ___ (grad).",
     answer: "gradu",
     case: "Dativ",
-    explanation: "prema verlangt hier den Dativ."
+    explanation: "prema verlangt den Dativ."
   },
 
   {
     sentence: "Živim u ___ (grad).",
     answer: "gradu",
     case: "Lokativ",
-    explanation: "u + Ort verwendet hier den Lokativ."
-  },
-
-  {
-    sentence: "Centar ___ (grad) je lijep.",
-    answer: "grada",
-    case: "Genitiv",
-    explanation: "Genitiv zeigt hier die Zugehörigkeit."
+    explanation: "u + Ort verwendet den Lokativ."
   },
 
   {
@@ -4523,6 +4531,55 @@ const grammarExercises = [
   {
     sentence: "Idem sa ___ (brat).",
     answer: "bratom",
+    case: "Instrumental",
+    explanation: "sa + Person verwendet den Instrumental."
+  },
+
+  {
+    sentence: "___ (grad) je velik.",
+    answer: "grad",
+    case: "Nominativ",
+    explanation: "grad ist hier das Subjekt des Satzes."
+  },
+
+  {
+    sentence: "___! Kako si?",
+    answer: "brate",
+    case: "Vokativ",
+    explanation: "Der Vokativ wird für direkte Anrede verwendet."
+  },
+
+  {
+    sentence: "Pričam o ___ (grad).",
+    answer: "gradu",
+    case: "Lokativ",
+    explanation: "o + Thema verlangt den Lokativ."
+  },
+
+  {
+    sentence: "Bez ___ (brat) ne idem.",
+    answer: "brata",
+    case: "Genitiv",
+    explanation: "bez verlangt den Genitiv."
+  },
+
+  {
+    sentence: "Dajem knjigu ___ (brat).",
+    answer: "bratu",
+    case: "Dativ",
+    explanation: "Der Empfänger steht hier im Dativ."
+  },
+
+  {
+    sentence: "Vidim ___ (brat).",
+    answer: "brata",
+    case: "Akkusativ",
+    explanation: "Bei einer männlichen Person steht der Akkusativ hier auf -a."
+  },
+
+  {
+    sentence: "Razgovaram sa ___ (prijatelj).",
+    answer: "prijateljem",
     case: "Instrumental",
     explanation: "sa + Person verwendet den Instrumental."
   }
