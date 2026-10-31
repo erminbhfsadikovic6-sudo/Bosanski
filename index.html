@@ -4666,88 +4666,245 @@ function answerPersonalExercise(index){
 
 const grammarExercises = [
 
+  // =========================
+  // SINGULAR
+  // =========================
+
   {
     sentence: "Centar ___ (grad) je lijep.",
     answer: "grada",
     case: "Genitiv",
-    explanation: "Genitiv zeigt hier Zugehörigkeit: das Zentrum der Stadt."
+    number: "singular",
+    explanation: "Zugehörigkeit → Genitiv."
   },
 
   {
     sentence: "Idem prema ___ (grad).",
     answer: "gradu",
     case: "Dativ",
-    explanation: "prema verlangt den Dativ."
+    number: "singular",
+    explanation: "prema + Dativ."
   },
 
   {
     sentence: "Živim u ___ (grad).",
     answer: "gradu",
     case: "Lokativ",
-    explanation: "u + Ort verwendet den Lokativ."
+    number: "singular",
+    explanation: "u + Ort → Lokativ."
   },
 
   {
-    sentence: "Vidim ___ (grad).",
+    sentence: "Idem u ___ (grad).",
     answer: "grad",
     case: "Akkusativ",
-    explanation: "grad ist hier das direkte Objekt."
-  },
-
-  {
-    sentence: "Idem sa ___ (brat).",
-    answer: "bratom",
-    case: "Instrumental",
-    explanation: "sa + Person verwendet den Instrumental."
-  },
-
-  {
-    sentence: "___ (grad) je velik.",
-    answer: "grad",
-    case: "Nominativ",
-    explanation: "grad ist hier das Subjekt des Satzes."
-  },
-
-  {
-    sentence: "___! Kako si?",
-    answer: "brate",
-    case: "Vokativ",
-    explanation: "Der Vokativ wird für direkte Anrede verwendet."
-  },
-
-  {
-    sentence: "Pričam o ___ (grad).",
-    answer: "gradu",
-    case: "Lokativ",
-    explanation: "o + Thema verlangt den Lokativ."
-  },
-
-  {
-    sentence: "Bez ___ (brat) ne idem.",
-    answer: "brata",
-    case: "Genitiv",
-    explanation: "bez verlangt den Genitiv."
-  },
-
-  {
-    sentence: "Dajem knjigu ___ (brat).",
-    answer: "bratu",
-    case: "Dativ",
-    explanation: "Der Empfänger steht hier im Dativ."
+    number: "singular",
+    explanation: "u + Bewegung/Ziel → Akkusativ."
   },
 
   {
     sentence: "Vidim ___ (brat).",
     answer: "brata",
     case: "Akkusativ",
-    explanation: "Bei einer männlichen Person steht der Akkusativ hier auf -a."
+    number: "singular",
+    explanation: "Männliche Person im Akkusativ → brata."
   },
 
   {
-    sentence: "Razgovaram sa ___ (prijatelj).",
+    sentence: "Dajem knjigu ___ (brat).",
+    answer: "bratu",
+    case: "Dativ",
+    number: "singular",
+    explanation: "Der Empfänger steht im Dativ."
+  },
+
+  {
+    sentence: "Idem sa ___ (brat).",
+    answer: "bratom",
+    case: "Instrumental",
+    number: "singular",
+    explanation: "sa + Person → Instrumental."
+  },
+
+  {
+    sentence: "Pričam o ___ (žena).",
+    answer: "ženi",
+    case: "Lokativ",
+    number: "singular",
+    explanation: "o + Thema → Lokativ."
+  },
+
+  {
+    sentence: "Vidim ___ (žena).",
+    answer: "ženu",
+    case: "Akkusativ",
+    number: "singular",
+    explanation: "žena → ženu im Akkusativ."
+  },
+
+  {
+    sentence: "Pričam sa ___ (žena).",
+    answer: "ženom",
+    case: "Instrumental",
+    number: "singular",
+    explanation: "sa + Person → Instrumental."
+  },
+
+  {
+    sentence: "Bez ___ (selo) nema života.",
+    answer: "sela",
+    case: "Genitiv",
+    number: "singular",
+    explanation: "bez + Genitiv."
+  },
+
+  {
+    sentence: "Živim u ___ (selo).",
+    answer: "selu",
+    case: "Lokativ",
+    number: "singular",
+    explanation: "u + Ort → Lokativ."
+  },
+
+  {
+    sentence: "Idem kroz ___ (selo).",
+    answer: "selo",
+    case: "Akkusativ",
+    number: "singular",
+    explanation: "kroz + Akkusativ."
+  },
+
+  {
+    sentence: "Radim sa ___ (prijatelj).",
     answer: "prijateljem",
     case: "Instrumental",
-    explanation: "sa + Person verwendet den Instrumental."
+    number: "singular",
+    explanation: "sa + Person → Instrumental."
+  },
+
+  {
+    sentence: "___, kako si?",
+    answer: "Brate",
+    case: "Vokativ",
+    number: "singular",
+    explanation: "Direkte Anrede → Vokativ."
+  },
+
+
+  // =========================
+  // PLURAL
+  // =========================
+
+  {
+    sentence: "Centar ___ (gradovi) je veliki.",
+    answer: "gradova",
+    case: "Genitiv",
+    number: "plural",
+    explanation: "Zugehörigkeit im Plural → Genitiv."
+  },
+
+  {
+    sentence: "Idem prema ___ (gradovi).",
+    answer: "gradovima",
+    case: "Dativ",
+    number: "plural",
+    explanation: "prema + Dativ Plural → -ima."
+  },
+
+  {
+    sentence: "Živim u ___ (gradovi).",
+    answer: "gradovima",
+    case: "Lokativ",
+    number: "plural",
+    explanation: "u + Ort → Lokativ Plural."
+  },
+
+  {
+    sentence: "Vidim ___ (gradovi).",
+    answer: "gradove",
+    case: "Akkusativ",
+    number: "plural",
+    explanation: "gradovi → gradove im Akkusativ."
+  },
+
+  {
+    sentence: "Idem sa ___ (bratovi).",
+    answer: "braćom",
+    case: "Instrumental",
+    number: "plural",
+    explanation: "sa + Personen → Instrumental. Die Pluralform von brat ist braća."
+  },
+
+  {
+    sentence: "Nema ___ (žene).",
+    answer: "žena",
+    case: "Genitiv",
+    number: "plural",
+    explanation: "Negation mit nema → Genitiv."
+  },
+
+  {
+    sentence: "Pričam sa ___ (žene).",
+    answer: "ženama",
+    case: "Instrumental",
+    number: "plural",
+    explanation: "sa + Personen → Instrumental Plural."
+  },
+
+  {
+    sentence: "Pomažem ___ (žene).",
+    answer: "ženama",
+    case: "Dativ",
+    number: "plural",
+    explanation: "Der Empfänger steht im Dativ Plural."
+  },
+
+  {
+    sentence: "Vidim ___ (žene).",
+    answer: "žene",
+    case: "Akkusativ",
+    number: "plural",
+    explanation: "žene bleibt im Akkusativ Plural unverändert."
+  },
+
+  {
+    sentence: "Živim u ___ (sela).",
+    answer: "selima",
+    case: "Lokativ",
+    number: "plural",
+    explanation: "u + Ort → Lokativ Plural."
+  },
+
+  {
+    sentence: "Idem kroz ___ (sela).",
+    answer: "sela",
+    case: "Akkusativ",
+    number: "plural",
+    explanation: "kroz + Akkusativ."
+  },
+
+  {
+    sentence: "Radim sa ___ (prijatelji).",
+    answer: "prijateljima",
+    case: "Instrumental",
+    number: "plural",
+    explanation: "sa + Personen → Instrumental Plural."
+  },
+
+  {
+    sentence: "Razgovaram o ___ (prijatelji).",
+    answer: "prijateljima",
+    case: "Lokativ",
+    number: "plural",
+    explanation: "o + Thema → Lokativ Plural."
+  },
+
+  {
+    sentence: "___, dođite ovamo!",
+    answer: "Prijatelji",
+    case: "Vokativ",
+    number: "plural",
+    explanation: "Direkte Anrede → Vokativ."
   }
 
 ];
@@ -4766,7 +4923,9 @@ function saveGrammarStats(){
 }
 
 function getGrammarKey(exercise){
-  return exercise.case;
+
+  return `${exercise.case}_${exercise.number || "singular"}`;
+
 }
 
 let grammarNumber = "singular";
@@ -4818,7 +4977,11 @@ function generateGrammarExercise(){
 
 const weightedExercises = [];
 
-grammarExercises.forEach(exercise => {
+grammarExercises
+  .filter(exercise =>
+    exercise.number === grammarNumber
+  )
+  .forEach(exercise => {
 
   const key = getGrammarKey(exercise);
 
