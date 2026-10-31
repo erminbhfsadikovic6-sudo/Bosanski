@@ -4649,6 +4649,21 @@ const grammarExercises = [
 
 let currentGrammarExercise = null;
 
+let grammarStats = JSON.parse(
+  localStorage.getItem("grammarStats") || "{}"
+);
+
+function saveGrammarStats(){
+  localStorage.setItem(
+    "grammarStats",
+    JSON.stringify(grammarStats)
+  );
+}
+
+function getGrammarKey(exercise){
+  return exercise.case;
+}
+
 
 function generateGrammarExercise(){
 
@@ -4657,13 +4672,59 @@ function generateGrammarExercise(){
 
   if(!container)return;
 
-  currentGrammarExercise =
-    grammarExercises[
-      Math.floor(
-        Math.random() *
-        grammarExercises.length
-      )
-    ];
+const weightedExercises = [];
+
+grammarExercises.forEach(exercise => {
+
+  const key = getGrammarKey(exercise);
+
+  const stats =
+    grammarStats[key] || {
+      attempts: 0,
+      correct: 0,
+      wrong: 0
+    };
+
+  let weight = 1;
+
+  /*
+   * Fälle mit vielen Fehlern
+   * werden häufiger ausgewählt.
+   */
+  weight += stats.wrong * 2;
+
+  /*
+   * Fälle mit wenig Übung
+   * bekommen ebenfalls etwas Priorität.
+   */
+  if(stats.attempts < 3){
+    weight += 2;
+  }
+
+  /*
+   * Bei sehr guter Trefferquote
+   * wird die Priorität reduziert.
+   */
+  if(
+    stats.attempts >= 5 &&
+    stats.correct / stats.attempts >= 0.8
+  ){
+    weight = Math.max(1, weight - 2);
+  }
+
+  for(let i = 0; i < weight; i++){
+    weightedExercises.push(exercise);
+  }
+
+});
+
+currentGrammarExercise =
+  weightedExercises[
+    Math.floor(
+      Math.random() *
+      weightedExercises.length
+    )
+  ];
 
   container.innerHTML = `
 
@@ -4724,10 +4785,49 @@ function checkGrammarAnswer(){
   const isCorrect =
     answer === correct;
 
+  const grammarKey =
+  getGrammarKey(currentGrammarExercise);
+
+if(!grammarStats[grammarKey]){
+
+  grammarStats[grammarKey] = {
+    attempts: 0,
+    correct: 0,
+    wrong: 0
+  };
+
+}
+
+grammarStats[grammarKey].attempts++;
+
+if(isCorrect){
+
+  grammarStats[grammarKey].correct++;
+
+}else{
+
+  grammarStats[grammarKey].wrong++;
+
+}
+
+saveGrammarStats();
+
   const container =
     document.getElementById(
       "grammarExercise"
     );
+
+  const stats =
+  grammarStats[
+    getGrammarKey(currentGrammarExercise)
+  ];
+
+const percentage =
+  stats.attempts > 0
+    ? Math.round(
+        (stats.correct / stats.attempts) * 100
+      )
+    : 0;
 
   container.innerHTML = `
 
@@ -4778,6 +4878,14 @@ function checkGrammarAnswer(){
         ${esc(
           currentGrammarExercise.explanation
         )}
+
+        <br><br>
+
+        📊 Deine Statistik:
+        <b>
+          ${stats.correct}/${stats.attempts}
+          (${percentage}%)
+        </b>
 
       </div>
 
