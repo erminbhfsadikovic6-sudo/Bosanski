@@ -29,6 +29,31 @@ main{
   padding:18px
 }
 
+.app-slider{
+  display:flex;
+  width:100%;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;
+  scrollbar-width:none;
+  overscroll-behavior-x:contain;
+}
+
+.app-slider::-webkit-scrollbar{
+  display:none;
+}
+
+.app-page{
+  flex:0 0 100%;
+  width:100%;
+  min-width:100%;
+  scroll-snap-align:start;
+}
+
+.grammar-page{
+  padding-bottom:40px;
+}
+
 header{
   display:flex;
   align-items:center;
@@ -564,12 +589,112 @@ select{
   padding:20px;
   color:#667085;
 }
+
+.grammar-header{
+  margin-bottom:18px;
+}
+
+.case-table{
+  width:100%;
+  overflow:hidden;
+  border-radius:12px;
+  border:1px solid #e3e6ea;
+}
+
+.case-row{
+  display:grid;
+  grid-template-columns:1.3fr 1fr 1fr;
+  gap:8px;
+  padding:11px 10px;
+  border-bottom:1px solid #e3e6ea;
+  font-size:14px;
+  align-items:center;
+}
+
+.case-row:last-child{
+  border-bottom:0;
+}
+
+.case-head{
+  background:#f4f6f8;
+  font-weight:600;
+  color:#475467;
+}
+
+.grammar-explanation p{
+  background:#f8fafc;
+  border-radius:12px;
+  padding:12px;
+  margin:9px 0;
+  line-height:1.5;
+}
+
+.grammar-explanation span{
+  color:#1769e0;
+}
+
+.grammar-question{
+  font-size:19px;
+  font-weight:600;
+  line-height:1.5;
+  margin-bottom:16px;
+}
+
+.grammar-input{
+  width:100%;
+  font-size:18px;
+  padding:13px;
+  border:1px solid #ccd1d8;
+  border-radius:12px;
+  margin-bottom:10px;
+}
+
+.grammar-result{
+  margin-top:14px;
+  padding:12px;
+  border-radius:12px;
+  background:#fff;
+}
+
+.grammar-correct{
+  color:#18794e;
+}
+
+.grammar-wrong{
+  color:#b42318;
+}
+
+.grammar-meta{
+  margin-top:8px;
+  font-size:13px;
+  color:#667085;
+}
+
+.grammar-next{
+  margin-top:12px;
+  width:100%;
+}
+
+@media(max-width:520px){
+
+  .case-row{
+    grid-template-columns:1.3fr 1fr 1fr;
+    font-size:12px;
+    padding:9px 7px;
+  }
+
+}
+  
 </style>
 </head>
 
 <body>
 
 <main>
+
+<div class="app-slider">
+
+<section class="app-page">
 
 <header>
   <div>
@@ -946,9 +1071,151 @@ select{
   </div>
 
 </div>
+
+</section>
+
+<section class="app-page grammar-page">
+
+<div class="grammar-header">
+
+  <h1>🇧🇦 Grammatik</h1>
+
+  <div class="sub">
+    Fälle & Endungen
+  </div>
+
+</div>
+
+
+<div class="panel">
+
+  <h2>📖 Die sieben Fälle</h2>
+
+  <p class="small">
+    Die Fälle bestimmen, welche Form ein Wort im Satz bekommt.
+  </p>
+
+  <div class="case-table">
+
+    <div class="case-row case-head">
+      <div>Fall</div>
+      <div>Frage</div>
+      <div>Beispiel</div>
+    </div>
+
+    <div class="case-row">
+      <div><b>Nominativ</b></div>
+      <div>Wer? Was?</div>
+      <div>grad</div>
+    </div>
+
+    <div class="case-row">
+      <div><b>Genitiv</b></div>
+      <div>Wessen?</div>
+      <div>grada</div>
+    </div>
+
+    <div class="case-row">
+      <div><b>Dativ</b></div>
+      <div>Wem?</div>
+      <div>gradu</div>
+    </div>
+
+    <div class="case-row">
+      <div><b>Akkusativ</b></div>
+      <div>Wen? Was?</div>
+      <div>grad</div>
+    </div>
+
+    <div class="case-row">
+      <div><b>Vokativ</b></div>
+      <div>Anrede</div>
+      <div>grade</div>
+    </div>
+
+    <div class="case-row">
+      <div><b>Lokativ</b></div>
+      <div>Wo? Worüber?</div>
+      <div>gradu</div>
+    </div>
+
+    <div class="case-row">
+      <div><b>Instrumental</b></div>
+      <div>Womit?</div>
+      <div>gradom</div>
+    </div>
+
+  </div>
+
+</div>
+
+
+<div class="panel">
+
+  <h2>🧠 Wie funktioniert das?</h2>
+
+  <div class="grammar-explanation">
+
+    <p>
+      <b>Nominativ</b> ist meistens das Subjekt:
+      <br>
+      <span>Grad je velik.</span>
+    </p>
+
+    <p>
+      <b>Genitiv</b> zeigt häufig Zugehörigkeit oder Mengen:
+      <br>
+      <span>Centar grada.</span>
+    </p>
+
+    <p>
+      <b>Dativ</b> bezeichnet häufig das Ziel oder den Empfänger:
+      <br>
+      <span>Idem prema gradu.</span>
+    </p>
+
+    <p>
+      <b>Akkusativ</b> bezeichnet häufig das direkte Objekt:
+      <br>
+      <span>Vidim grad.</span>
+    </p>
+
+    <p>
+      <b>Lokativ</b> steht häufig nach bestimmten Präpositionen:
+      <br>
+      <span>Živim u gradu.</span>
+    </p>
+
+    <p>
+      <b>Instrumental</b> bezeichnet häufig Mittel, Begleitung oder Werkzeug:
+      <br>
+      <span>Idem s gradom.</span>
+    </p>
+
+  </div>
+
+</div>
+
+
+<div class="panel">
+
+  <h2>✏️ Fälle üben</h2>
+
+  <div id="grammarExercise">
+
+    <div class="grammar-question">
+      Lade eine Übung...
+    </div>
+
+  </div>
+
+</div>
+  
+</section>
+
+</div>
   
 </main>
-
 
 <script>
 
@@ -4218,6 +4485,198 @@ function answerPersonalExercise(index){
   );
 
 }
+
+/* =========================
+   GRAMMATIK
+   ========================= */
+
+const grammarExercises = [
+
+  {
+    sentence: "Idem prema ___ (grad).",
+    answer: "gradu",
+    case: "Dativ",
+    explanation: "prema verlangt hier den Dativ."
+  },
+
+  {
+    sentence: "Živim u ___ (grad).",
+    answer: "gradu",
+    case: "Lokativ",
+    explanation: "u + Ort verwendet hier den Lokativ."
+  },
+
+  {
+    sentence: "Centar ___ (grad) je lijep.",
+    answer: "grada",
+    case: "Genitiv",
+    explanation: "Genitiv zeigt hier die Zugehörigkeit."
+  },
+
+  {
+    sentence: "Vidim ___ (grad).",
+    answer: "grad",
+    case: "Akkusativ",
+    explanation: "grad ist hier das direkte Objekt."
+  },
+
+  {
+    sentence: "Idem sa ___ (brat).",
+    answer: "bratom",
+    case: "Instrumental",
+    explanation: "sa + Person verwendet den Instrumental."
+  }
+
+];
+
+
+let currentGrammarExercise = null;
+
+
+function generateGrammarExercise(){
+
+  const container =
+    document.getElementById("grammarExercise");
+
+  if(!container)return;
+
+  currentGrammarExercise =
+    grammarExercises[
+      Math.floor(
+        Math.random() *
+        grammarExercises.length
+      )
+    ];
+
+  container.innerHTML = `
+
+    <div class="grammar-question">
+      ${esc(
+        currentGrammarExercise.sentence
+      )}
+    </div>
+
+    <input
+      id="grammarAnswer"
+      class="grammar-input"
+      placeholder="Endung / Form eingeben..."
+      autocomplete="off"
+      onkeydown="
+        if(event.key === 'Enter'){
+          checkGrammarAnswer();
+        }
+      "
+    >
+
+    <button
+      class="primary"
+      onclick="checkGrammarAnswer()">
+      Prüfen
+    </button>
+
+  `;
+}
+
+
+function checkGrammarAnswer(){
+
+  if(!currentGrammarExercise)return;
+
+  const input =
+    document.getElementById(
+      "grammarAnswer"
+    );
+
+  if(!input)return;
+
+  const answer =
+    input.value
+      .trim()
+      .toLocaleLowerCase("de-DE");
+
+  const correct =
+    currentGrammarExercise.answer
+      .toLocaleLowerCase("de-DE");
+
+  if(!answer){
+
+    return;
+
+  }
+
+  const isCorrect =
+    answer === correct;
+
+  const container =
+    document.getElementById(
+      "grammarExercise"
+    );
+
+  container.innerHTML = `
+
+    <div class="${
+      isCorrect
+        ? "grammar-correct"
+        : "grammar-wrong"
+    }">
+
+      <b>
+        ${
+          isCorrect
+            ? "✅ Richtig!"
+            : "❌ Nicht ganz."
+        }
+      </b>
+
+    </div>
+
+    <div class="grammar-result">
+
+      ${
+        !isCorrect
+          ? `
+            Deine Antwort:
+            <b>${esc(input.value)}</b>
+            <br><br>
+          `
+          : ""
+      }
+
+      Richtige Form:
+      <b>${esc(
+        currentGrammarExercise.answer
+      )}</b>
+
+      <div class="grammar-meta">
+
+        Fall:
+        <b>
+          ${esc(
+            currentGrammarExercise.case
+          )}
+        </b>
+
+        <br>
+
+        ${esc(
+          currentGrammarExercise.explanation
+        )}
+
+      </div>
+
+    </div>
+
+    <button
+      class="primary grammar-next"
+      onclick="generateGrammarExercise()">
+
+      ➡️ Nächste Übung
+
+    </button>
+
+  `;
+}
+  
 /* =========================
    DECK WECHSELN
    ========================= */  
@@ -4325,6 +4784,7 @@ if(
    ========================= */
 
 renderAll();
+generateGrammarExercise();
 
 </script>
 
